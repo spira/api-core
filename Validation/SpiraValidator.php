@@ -99,7 +99,7 @@ class SpiraValidator extends Validator
             ->where($attribute, '=', $value)
             ->where($parameters[1], '=', $this->getData()[$parameters[1]]);
 
-        if(!empty($parameters[2])) {
+        if (! empty($parameters[2])) {
             $query->where($parameters[2], '!=', $this->getData()[$parameters[2]]);
         }
 
