@@ -150,14 +150,23 @@ class ValidatorTest extends TestCase
             'text' => 'foobar',
         ])->create();
 
-        $testEntity->entity_id = (string) Uuid::uuid4();
+        // Check to see if you can update an entity when the exclude field is used
+        $testEntity->varchar = 'foobarfoobar';
 
+        $validationPassUpdateMeta = $this->validator->make($testEntity->toArray(), [
+            'integer' => 'unique_with:'.TestEntity::getTableName().',text,'.TestEntity::getPrimaryKey(),
+        ]);
+
+        $this->assertTrue($validationPassUpdateMeta->passes());
+
+        // Check to see if the validation correctly fails a non-unique entity
         $validationFail = $this->validator->make($testEntity->toArray(), [
             'integer' => 'unique_with:'.TestEntity::getTableName().',text',
         ]);
 
         $this->assertFalse($validationFail->passes());
 
+        // Check to see if the validation passes on a unique entity
         $testEntity->text = 'barfoo';
 
         $validationPass = $this->validator->make($testEntity->toArray(), [
