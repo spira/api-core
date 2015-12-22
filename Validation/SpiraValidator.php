@@ -81,18 +81,29 @@ class SpiraValidator extends Validator
 
     /**
      * Rule used to validate if two columns are unique within a table.
-     * 
-     * Usage: 
-     * 'field1' => 'unique_with:table_name,field2'
+     *
+     * Usage:
+     * 'field1' => 'unique_with:table_name,field2,(optional)exclude_field'
+     *
+     * E.g.
+     *
+     * 'metaable_id' => 'unique_with:metas,meta_name,meta_id'
+     *
+     * Validation will fail if a meta is found with the same metaable_id and
+     * meta_name fields unless it is the same meta tag which is already
+     * saved in the database (identified by meta_id).
      */
     public function validateUniqueWith($attribute, $value, $parameters)
     {
-        $count = DB::table($parameters[0])
+        $query = DB::table($parameters[0])
             ->where($attribute, '=', $value)
-            ->where($parameters[1], '=', $this->getData()[$parameters[1]])
-            ->count();
+            ->where($parameters[1], '=', $this->getData()[$parameters[1]]);
 
-        if ($count > 0) {
+        if (! empty($parameters[2])) {
+            $query->where($parameters[2], '!=', $this->getData()[$parameters[2]]);
+        }
+
+        if ($query->count() > 0) {
             return false;
         }
 
