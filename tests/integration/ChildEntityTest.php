@@ -143,6 +143,31 @@ class ChildEntityTest extends TestCase
         $this->assertEquals($childEntity->entity_id, $object->entityId);
     }
 
+    public function testGetOneFallBackToParent()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $entity2 = factory(SecondTestEntity::class)->make();
+
+        $entity2->entity_id = $entity->entity_id;
+        $entity2->value = 'random_value_impossible_to_be_generated_as_id';
+
+        $entity->testMany()->save($entity2);
+
+        $this->getJson('/test/entities/'.$entity->entity_id.'/child');
+        $object = json_decode($this->response->getContent());
+        $this->assertResponseOk();
+        $this->shouldReturnJson();
+
+        $this->assertTrue(is_object($object), 'Response is an object');
+
+        $this->assertObjectHasAttribute('entityId', $object);
+        $this->assertTrue(Uuid::isValid($object->entityId));
+        $this->assertTrue(strlen($object->entityId) === 36, 'UUID has 36 chars');
+        $this->assertTrue(is_string($object->value), 'Varchar column type is text');
+
+        $this->assertEquals($entity2->value, 'random_value_impossible_to_be_generated_as_id');
+    }
+
     public function testPostOneValid()
     {
         $entity = factory(TestEntity::class)->create();
@@ -188,6 +213,24 @@ class ChildEntityTest extends TestCase
 
         $this->assertResponseStatus(201);
         $this->assertEquals($rowCount + 1, TestEntity::find($entity->entity_id)->testMany->count());
+        $this->assertTrue(is_object($object));
+    }
+
+    public function testPutOneFallbackToParentId()
+    {
+        $entity = factory(TestEntity::class)->create();
+
+
+        $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
+            'entity_id'=> $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id'
+        ])->transformed();
+
+        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/child', $entity2);
+
+        $object = json_decode($this->response->getContent());
+
+        $this->assertResponseStatus(201);
         $this->assertTrue(is_object($object));
     }
 
@@ -347,6 +390,28 @@ class ChildEntityTest extends TestCase
         $this->assertEquals('foobar', $childEntity->value);
     }
 
+    public function testPatchOneFallbackToParentId()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
+            'entity_id'=> $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id'
+        ])->make();
+
+        $entity->testMany()->save($entity2);
+
+        $this->withAuthorization()->patchJson('/test/entities/'.$entity->entity_id.'/child', ['value' => 'foobar']);
+
+        $entity = TestEntity::find($entity->entity_id);
+        /** @var Collection $childEntities */
+        $childEntities = $entity->testMany;
+        $childEntity = $childEntities->find($entity2->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        $this->assertEquals('foobar', $childEntity->value);
+    }
+
     public function testPatchOneInvalidId()
     {
         $entity = factory(TestEntity::class)->create();
@@ -434,6 +499,28 @@ class ChildEntityTest extends TestCase
         $this->assertResponseStatus(204);
         $this->assertResponseHasNoContent();
         $this->assertEquals($childCount - 1, TestEntity::find($entity->entity_id)->testMany->count());
+    }
+
+    public function testDeleteOneFallbackToParentId()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
+            'entity_id'=> $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id'
+        ])->make();
+
+        $entity->testMany()->save($entity2);
+
+        $this->withAuthorization()->deleteJson('/test/entities/'.$entity->entity_id.'/child');
+
+        $entity = TestEntity::find($entity->entity_id);
+        /** @var Collection $childEntities */
+        $childEntities = $entity->testMany;
+        $childEntity = $childEntities->find($entity2->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        $this->assertEmpty($childEntity);
     }
 
     public function testDeleteOneInvalidId()

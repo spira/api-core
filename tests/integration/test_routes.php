@@ -24,12 +24,15 @@ $app->group(['namespace' => 'Spira\Core\tests\integration', 'middleware' => 'req
     $app->put('test/entities/{id}/localizations/{region}', 'TestController@putOneLocalization');
 
     $app->post('test/entities/{id}/child', 'ChildTestController@postOne');
+    $app->put('test/entities/{id}/child', 'ChildTestController@putOne');
     $app->put('test/entities/{id}/child/{childId}', 'ChildTestController@putOne');
     $app->put('test/entities/{id}/children', 'ChildTestController@putMany');
     $app->post('test/entities/{id}/children', 'ChildTestController@postMany');
     $app->patch('test/entities/{id}/child/{childId}', 'ChildTestController@patchOne');
+    $app->patch('test/entities/{id}/child', 'ChildTestController@patchOne');
     $app->patch('test/entities/{id}/children', 'ChildTestController@patchMany');
     $app->delete('test/entities/{id}/child/{childId}', 'ChildTestController@deleteOne');
+    $app->delete('test/entities/{id}/child', 'ChildTestController@deleteOne');
     $app->delete('test/entities/{id}/children', 'ChildTestController@deleteMany');
 
     $app->put('test/entities/{id}/child/{childId}/localizations/{region}', 'ChildTestController@putOneChildLocalization');
@@ -49,6 +52,7 @@ $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Applicati
     $app->get('test/entities/{id}/localizations/{region}', 'TestController@getOneLocalization');
 
     $app->get('test/entities/{id}/children', 'ChildTestController@getAll');
+    $app->get('test/entities/{id}/child', 'ChildTestController@getOne');
     $app->get('test/entities/{id}/child/{childId}', 'ChildTestController@getOne');
 
     $app->get('test/many/{id}/children', 'LinkedEntityTestController@getAll');
@@ -57,4 +61,7 @@ $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Applicati
     $app->put('test/many/{id}/children/{childId}', 'LinkedEntityTestController@attachOne');
     $app->delete('test/many/{id}/children/{childId}', 'LinkedEntityTestController@detachOne');
     $app->delete('test/many/{id}/children', 'LinkedEntityTestController@detachAll');
+
+    $app->get('test/simple-auth', 'ControllerWithAuth@getOne');
+    $app->get('test/default-auth', 'ControllerWithDefaultAuth@getOne');
 });

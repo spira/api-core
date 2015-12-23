@@ -58,11 +58,6 @@ class SpiraValidator extends Validator
         return false;
     }
 
-//    public function validateRbacRoleExists($attribute, $value, $parameters)
-//    {
-//        return (bool) $this->getGate()->getStorage()->getItem($value);
-//    }
-
     public function validateNotRequiredIf($attribute, $value, $parameters)
     {
         $this->requireParameterCount(2, $parameters, 'not_required_if');
@@ -121,14 +116,6 @@ class SpiraValidator extends Validator
 
         return in_array($value, $supportedRegionCodes);
     }
-
-//    /**
-//     * @return Gate
-//     */
-//    public function getGate()
-//    {
-//        return app(Gate::class);
-//    }
 
     /**
      * Validate whether the attribute is decoded json (object or array).

@@ -55,6 +55,38 @@ class ValidatorTest extends TestCase
         }
     }
 
+    public function testExistsMorphedValidationBadUuid()
+    {
+        $validator = $this->validator->make(
+            ['item_id' => 'bad-uuid', 'item_type' => TestEntity::class],
+            ['item_id' => 'exists_morphed:item_type']
+        );
+
+        $this->assertEquals(false, $validator->passes());
+        $this->assertEquals('The item id must exists in corresponding table', $validator->messages()->get('item_id')[0]);
+
+    }
+
+    public function testNotRequiredIfFalse()
+    {
+        $validator = $this->validator->make(
+            ['first_param' => 'value', 'second_param' => 'value2'],
+            ['first_param' => 'not_required_if:second_param,value2']
+        );
+
+        $this->assertEquals(false, $validator->passes());
+    }
+
+    public function testNotRequiredIfTrue()
+    {
+        $validator = $this->validator->make(
+            ['first_param' => 'value', 'second_param' => 'value2'],
+            ['first_param' => 'not_required_if:second_param,value']
+        );
+
+        $this->assertEquals(true, $validator->passes());
+    }
+
     public function dataExistsMorphedValidation()
     {
         return [
@@ -64,6 +96,7 @@ class ValidatorTest extends TestCase
             ['exists_morphed:item_type,,integer,123', true],
             ['exists_morphed:item_type,entity_id,integer,321', false],
             ['exists_morphed:'.TestEntity::class, true],
+            ['exists_morphed:'.'\\Not\\Existing\\Class', false],
             ['exists_morphed:'.SecondTestEntity::class, false],
         ];
     }
