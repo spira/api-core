@@ -11,7 +11,7 @@ class ModelFactoryTest extends TestCase
 {
     public function testException()
     {
-        $this->setExpectedException('\LogicException','No factory class passed to model factory, cannot generate a mock');
+        $this->setExpectedException('\LogicException', 'No factory class passed to model factory, cannot generate a mock');
         $this->getFactory()->make();
     }
 
@@ -23,14 +23,14 @@ class ModelFactoryTest extends TestCase
         $this->assertUuid($entity->entity_id);
 
         $factoryWithBasicEntity = $this->getFactory(TestEntity::class);
-        $factoryWithBasicEntity->append('check','result');
+        $factoryWithBasicEntity->append('check', 'result');
         $factoryWithBasicEntity->showOnly(['entity_id']);
         $factoryWithBasicEntity->setTransformer(EloquentModelTransformer::class);
         $entity = $factoryWithBasicEntity->transformed();
         $this->assertUuid($entity['entityId']);
         $this->assertEquals($entity['check'], 'result');
 
-        $factoryWithBasicEntity->append('check','result');
+        $factoryWithBasicEntity->append('check', 'result');
         $encodedEntity = $factoryWithBasicEntity->toJson();
         $this->assertEquals(json_decode($encodedEntity, JSON_OBJECT_AS_ARRAY)['entityId'], $entity['entityId']);
 
@@ -45,12 +45,11 @@ class ModelFactoryTest extends TestCase
 
         $entity = $modelFactory->json(TestEntity::class);
         $this->assertJson($entity);
-
     }
 
     public function testAllCollection()
     {
-        $testEntitty =  $factory = $this->getFactory(TestEntity::class)->toArray();
+        $testEntitty = $factory = $this->getFactory(TestEntity::class)->toArray();
 
         $factory = $this->getFactory(TestEntity::class);
         /** @var Collection $collection */

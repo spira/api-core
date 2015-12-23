@@ -220,10 +220,9 @@ class ChildEntityTest extends TestCase
     {
         $entity = factory(TestEntity::class)->create();
 
-
         $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
-            'entity_id'=> $entity->entity_id,
-            'value' => 'random_value_impossible_to_be_generated_as_id'
+            'entity_id' => $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id',
         ])->transformed();
 
         $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/child', $entity2);
@@ -394,8 +393,8 @@ class ChildEntityTest extends TestCase
     {
         $entity = factory(TestEntity::class)->create();
         $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
-            'entity_id'=> $entity->entity_id,
-            'value' => 'random_value_impossible_to_be_generated_as_id'
+            'entity_id' => $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id',
         ])->make();
 
         $entity->testMany()->save($entity2);
@@ -505,8 +504,8 @@ class ChildEntityTest extends TestCase
     {
         $entity = factory(TestEntity::class)->create();
         $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
-            'entity_id'=> $entity->entity_id,
-            'value' => 'random_value_impossible_to_be_generated_as_id'
+            'entity_id' => $entity->entity_id,
+            'value' => 'random_value_impossible_to_be_generated_as_id',
         ])->make();
 
         $entity->testMany()->save($entity2);

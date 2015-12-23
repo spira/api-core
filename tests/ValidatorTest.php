@@ -64,7 +64,6 @@ class ValidatorTest extends TestCase
 
         $this->assertEquals(false, $validator->passes());
         $this->assertEquals('The item id must exists in corresponding table', $validator->messages()->get('item_id')[0]);
-
     }
 
     public function testNotRequiredIfFalse()

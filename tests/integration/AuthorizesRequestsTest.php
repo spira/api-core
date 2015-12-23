@@ -21,12 +21,12 @@ class AuthorizesRequestsTest extends TestCase
             require __DIR__.'/test_routes.php';
         });
         $this->gate = Mockery::mock(Gate::class);
-        $this->app->singleton(Gate::class, function(){return $this->gate;});
+        $this->app->singleton(Gate::class, function () {return $this->gate; });
     }
 
     public function testSimpleSuccess()
     {
-        $this->app[Gate::class]->shouldReceive('check')->once()->with('getOne',[])->andReturn(true);
+        $this->app[Gate::class]->shouldReceive('check')->once()->with('getOne', [])->andReturn(true);
 
         $this->withAuthorization()->getJson('/test/simple-auth');
         $this->assertResponseOk();
@@ -36,21 +36,21 @@ class AuthorizesRequestsTest extends TestCase
 
     public function testSimpleFail()
     {
-        $this->app[Gate::class]->shouldReceive('check')->once()->with('getOne',[])->andReturn(false);
+        $this->app[Gate::class]->shouldReceive('check')->once()->with('getOne', [])->andReturn(false);
         $this->withAuthorization()->getJson('/test/simple-auth');
         $this->assertResponseStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function testDefaultSuccess()
     {
-        $this->app[Gate::class]->shouldReceive('check')->once()->with('some_default',[])->andReturn(true);
+        $this->app[Gate::class]->shouldReceive('check')->once()->with('some_default', [])->andReturn(true);
         $this->withAuthorization()->getJson('/test/default-auth');
         $this->assertResponseStatus(Response::HTTP_NO_CONTENT);
     }
 
     public function testDefaultFail()
     {
-        $this->app[Gate::class]->shouldReceive('check')->once()->with('some_default',[])->andReturn(false);
+        $this->app[Gate::class]->shouldReceive('check')->once()->with('some_default', [])->andReturn(false);
         $this->withAuthorization()->getJson('/test/default-auth');
         $this->assertResponseStatus(Response::HTTP_FORBIDDEN);
     }

@@ -10,7 +10,6 @@
 
 namespace Spira\Core\Validation;
 
-use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Arr;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Datasets\Countries;
