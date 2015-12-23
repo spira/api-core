@@ -19,8 +19,8 @@ class ModelFactoryTest extends TestCase
     {
         $entity = $this->getFactory(TestEntity::class)->json();
         $this->assertJson($entity);
-        $entity = $this->getFactory(TestEntity::class)->make();
-        $this->assertUuid($entity->entity_id);
+        $entityModel = $this->getFactory(TestEntity::class)->make();
+        $this->assertUuid($entityModel->entity_id);
 
         $factoryWithBasicEntity = $this->getFactory(TestEntity::class);
         $factoryWithBasicEntity->append('check', 'result');
@@ -34,9 +34,10 @@ class ModelFactoryTest extends TestCase
         $encodedEntity = $factoryWithBasicEntity->toJson();
         $this->assertEquals(json_decode($encodedEntity, JSON_OBJECT_AS_ARRAY)['entityId'], $entity['entityId']);
 
-        $collection = $factoryWithBasicEntity->count(3)->make();
+        $collection = $this->getFactory(TestEntity::class)->setModel($entityModel)->count(3)->make();
+
         foreach ($collection as $item) {
-            $this->assertEquals($item->entity_id, $entity['entityId']);
+            $this->assertInstanceOf(TestEntity::class, $item);
         }
 
         $modelFactory = new ModelFactory();
