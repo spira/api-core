@@ -11,6 +11,7 @@
 namespace Spira\Core\Model\Test;
 
 use Spira\Core\Model\Model\BaseModel;
+use Spira\Core\Model\Model\IndexedModel;
 use Spira\Core\Model\Model\LocalizableModelInterface;
 use Spira\Core\Model\Model\LocalizableModelTrait;
 

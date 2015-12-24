@@ -20,10 +20,40 @@ class ElasticSearchTest extends TestCase
     public function setUp()
     {
         parent::setUp();
+
+        if(!TestEntity::indexExists()){
+            TestEntity::createIndex();
+        }
+
         TestEntity::flushEventListeners();
         TestEntity::boot(); //run event listeners
 
         TestEntity::removeAllFromIndex();
+    }
+
+    public function testIndexExist()
+    {
+        $this->assertTrue(TestEntity::indexExists());
+        $this->assertTrue((bool)TestEntity::deleteIndex());
+        $this->assertFalse(TestEntity::indexExists());
+    }
+
+    public function testCountIndex()
+    {
+        /** @var TestEntity $entity */
+        $entity = $this->getFactory(TestEntity::class)->create();
+
+        $data = $entity->countIndex();
+        $result = [
+            "count" => 0,
+            "_shards" =>
+                [
+                    "total" => 5,
+                    "successful" => 5,
+                    "failed" => 0
+                ]
+        ];
+        $this->assertEquals($result, $data);
     }
 
     /**
@@ -45,6 +75,16 @@ class ElasticSearchTest extends TestCase
         $this->assertEquals(1, $search->totalHits());
 
         $testEntity->delete(); //clean up so it doesn't remain in the index
+    }
+
+    /**
+     * No abstract static methods
+     * So we make small coverage hack here
+     */
+    public function testCoverageStatic()
+    {
+        TestEntity::createCustomIndexes();
+        TestEntity::deleteCustomIndexes();
     }
 
     public function testElasticSearchRemoveFromIndex()
