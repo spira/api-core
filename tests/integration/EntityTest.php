@@ -10,6 +10,8 @@
 
 namespace Spira\Core\tests\integration;
 
+use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Mockery;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\Localization;
@@ -53,6 +55,22 @@ class EntityTest extends TestCase
         $this->getFactory(SecondTestEntity::class)->count(5)->make()->each(function ($secondEntity) use ($model) {
             $model->testMany()->save($secondEntity);
         });
+    }
+
+    public function testSetTimeCarbon()
+    {
+        $entity = new TestEntity();
+        $entity->setAttribute(TestEntity::UPDATED_AT, '10-10-2016');
+        $this->assertInstanceOf(Carbon::class, $entity->getAttribute(TestEntity::UPDATED_AT));
+    }
+
+    public function testFindByRouteParam()
+    {
+        $routeParams = ['varchar' => 'foo', 'hash' => 'bar'];
+        $realEntity = $this->getFactory(TestEntity::class)->customize($routeParams)->create();
+        $testEntity = new TestEntity();
+        $foundEntity = $testEntity->findByRouteParams($routeParams);
+        $this->assertEquals($realEntity->entity_id, $foundEntity->entity_id);
     }
 
     public function testGetAll()
@@ -426,6 +444,16 @@ class EntityTest extends TestCase
         $this->assertResponseStatus(201);
         $this->assertTrue(is_object($object));
         $this->assertStringStartsWith('http', $object->_self);
+    }
+
+    public function testPostOneBadAuth()
+    {
+        $entity = $this->getFactory(TestEntity::class)
+            ->makeVisible(['hidden'])
+            ->transformed();
+
+        $this->postJson('/test/entities', $entity);
+        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
     }
 
     public function testPostOneInvalid()
