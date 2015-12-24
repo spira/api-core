@@ -11,21 +11,23 @@
 namespace Spira\Core\tests\Services;
 
 use GuzzleHttp\Client;
+use Mockery;
+use Spira\Core\Contract\Exception\ServiceUnavailableException;
+use Spira\Core\Model\Datasets\Countries;
 use Spira\Core\tests\TestCase;
 
 class DatasetsTest extends TestCase
 {
     public function testCountries()
     {
-        $this->markTestSkipped();
         $client = new Client;
         $cache = \Mockery::mock('Illuminate\Contracts\Cache\Repository');
 
-        $set = \Mockery::mock('App\Services\Datasets\Countries', [$client, $cache])
+        $set = \Mockery::mock(Countries::class, [$client, $cache])
             ->makePartial()
             ->shouldAllowMockingProtectedMethods();
 
-        /** @var Illuminate\Support\Collection $countries */
+        /** @var \Illuminate\Support\Collection $countries */
         $countries = $set->getDataset();
         $country = $countries->first();
 
@@ -37,17 +39,17 @@ class DatasetsTest extends TestCase
 
     public function testCountriesServiceUnavailable()
     {
-        $this->markTestSkipped();
+
         $this->setExpectedExceptionRegExp(
             ServiceUnavailableException::class,
             '/unavailable/i',
             0
         );
 
-        $client = new GuzzleHttp\Client;
+        $client = new Client;
         $cache = Mockery::mock('Illuminate\Contracts\Cache\Repository');
 
-        $set = Mockery::mock('App\Services\Datasets\Countries', [$client, $cache])
+        $set = Mockery::mock(Countries::class, [$client, $cache])
             ->makePartial()
             ->shouldAllowMockingProtectedMethods();
         $set->shouldReceive('getEndpoint')->once()->andReturn('https://restcountries.eu/foobar');

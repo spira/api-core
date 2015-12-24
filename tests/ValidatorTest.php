@@ -10,11 +10,13 @@
 
 namespace Spira\Core\tests;
 
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Factory;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\Validation\SpiraValidator;
+use Spira\Core\Validation\ValidationException;
 
 class ValidatorTest extends TestCase
 {
@@ -173,5 +175,11 @@ class ValidatorTest extends TestCase
         $this->assertFalse($validation->passes());
 
         $this->assertContains('spaces', $validation->messages()->get('username')[0]);
+    }
+
+    public function testExceptionHeaders()
+    {
+        $exception = new ValidationException(new MessageBag());
+        $this->assertEmpty($exception->getHeaders());
     }
 }

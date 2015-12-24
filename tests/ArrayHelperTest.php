@@ -15,6 +15,9 @@ class ArrayHelperTest extends TestCase
                 'valueAdded' => [
                     'one' => 'one',
                 ],
+                'noSuchValue' => [
+                    'no'
+                ]
             ],
             'secondInner' => [],
 
@@ -39,6 +42,9 @@ class ArrayHelperTest extends TestCase
                     'one' => 'one',
                     'two' => 'two',
                 ],
+                'noSuchValue' => [
+                    'no'
+                ]
             ],
             'secondInner' => [
                 'three',

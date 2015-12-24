@@ -323,38 +323,6 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
     }
 
     /**
-     * Override this method to provide custom validation rules.
-     *
-     * @return array
-     */
-    protected function prepareSyncList(Collection $childModels, array $requestCollection)
-    {
-        $childPk = $this->getChildModel()->getPrimaryKey();
-
-        $childModels->keyBy($childPk);
-
-        $requestCollection = new Collection($requestCollection);
-        $requestCollection->keyBy($childPk);
-
-        $syncList = $childModels->reduce(function ($syncList, $childModel) use ($requestCollection, $childPk) {
-
-            $key = $childModel->{$childPk};
-            $requestItem = $requestCollection[$key];
-            if (isset($requestItem['_pivot'])) {
-                $syncList[$key] = $requestItem['_pivot'];
-
-                return $syncList;
-            }
-
-            $syncList[] = $key;
-
-            return $syncList;
-        }, []);
-
-        return $syncList;
-    }
-
-    /**
      * @param $childId
      * @param BaseModel $parentModel
      * @return bool

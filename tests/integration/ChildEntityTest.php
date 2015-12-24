@@ -315,12 +315,34 @@ class ChildEntityTest extends TestCase
 
         $childCount = TestEntity::find($entity->entity_id)->testMany->count();
 
-        $this->withAuthorization()->postJson('/test/entities/'.$entity->entity_id.'/children', $childEntities);
+        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/children', $childEntities);
 
         $object = json_decode($this->response->getContent());
 
         $this->assertResponseStatus(201);
         $this->assertEquals($childCount + 5, TestEntity::find($entity->entity_id)->testMany->count());
+        $this->assertTrue(is_array($object));
+        $this->assertCount(5, $object);
+    }
+
+    public function testPutManyNewBelongs()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+
+        $childEntities = factory(SecondTestEntity::class, 5)->make();
+        $childEntities = array_map(function ($entity) {
+            return $this->prepareEntity($entity);
+        }, $childEntities->all());
+
+        $childCount = TestEntity::find($entity->entity_id)->secondTestEntities->count();
+
+        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/childrenbelongs', $childEntities);
+
+        $object = json_decode($this->response->getContent());
+
+        $this->assertResponseStatus(201);
+        $this->assertEquals($childCount + 5, TestEntity::find($entity->entity_id)->secondTestEntities->count());
         $this->assertTrue(is_array($object));
         $this->assertCount(5, $object);
     }

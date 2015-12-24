@@ -27,6 +27,7 @@ $app->group(['namespace' => 'Spira\Core\tests\integration', 'middleware' => 'req
     $app->put('test/entities/{id}/child', 'ChildTestController@putOne');
     $app->put('test/entities/{id}/child/{childId}', 'ChildTestController@putOne');
     $app->put('test/entities/{id}/children', 'ChildTestController@putMany');
+    $app->put('test/entities/{id}/childrenbelongs', 'ChildTestControllerBelongs@putMany');
     $app->post('test/entities/{id}/children', 'ChildTestController@postMany');
     $app->patch('test/entities/{id}/child/{childId}', 'ChildTestController@patchOne');
     $app->patch('test/entities/{id}/child', 'ChildTestController@patchOne');
