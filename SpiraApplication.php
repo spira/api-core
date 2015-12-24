@@ -41,11 +41,11 @@ class SpiraApplication extends Application
      */
     protected function getMonologHandler()
     {
+        // @codeCoverageIgnoreStart
         if (env('LOG_UDP_HOST')) {
             return new SyslogUdpHandler(env('LOG_UDP_HOST'), env('LOG_UDP_PORT'));
         }
 
-        // @codeCoverageIgnoreStart
         return parent::getMonologHandler();
         // @codeCoverageIgnoreEnd
     }

@@ -15,6 +15,12 @@ class ModelFactoryTest extends TestCase
         $this->getFactory()->make();
     }
 
+    public function testCustom()
+    {
+        $entity = $this->getFactory(TestEntity::class, 'custom')->make();
+        $this->assertEquals('custom', $entity->varchar);
+    }
+
     public function testAllBasic()
     {
         $entity = $this->getFactory(TestEntity::class)->json();

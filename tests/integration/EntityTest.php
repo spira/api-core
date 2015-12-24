@@ -10,6 +10,7 @@
 
 namespace Spira\Core\tests\integration;
 
+use Illuminate\Http\Response;
 use Mockery;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\Localization;
@@ -426,6 +427,16 @@ class EntityTest extends TestCase
         $this->assertResponseStatus(201);
         $this->assertTrue(is_object($object));
         $this->assertStringStartsWith('http', $object->_self);
+    }
+
+    public function testPostOneBadAuth()
+    {
+        $entity = $this->getFactory(TestEntity::class)
+            ->makeVisible(['hidden'])
+            ->transformed();
+
+        $this->postJson('/test/entities', $entity);
+        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
     }
 
     public function testPostOneInvalid()
