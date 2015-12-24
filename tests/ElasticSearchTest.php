@@ -21,7 +21,7 @@ class ElasticSearchTest extends TestCase
     {
         parent::setUp();
 
-        if(!TestEntity::indexExists()){
+        if (! TestEntity::indexExists()) {
             TestEntity::createIndex();
         }
 
@@ -34,7 +34,7 @@ class ElasticSearchTest extends TestCase
     public function testIndexExist()
     {
         $this->assertTrue(TestEntity::indexExists());
-        $this->assertTrue((bool)TestEntity::deleteIndex());
+        $this->assertTrue((bool) TestEntity::deleteIndex());
         $this->assertFalse(TestEntity::indexExists());
     }
 
@@ -45,13 +45,12 @@ class ElasticSearchTest extends TestCase
 
         $data = $entity->countIndex();
         $result = [
-            "count" => 0,
-            "_shards" =>
-                [
-                    "total" => 5,
-                    "successful" => 5,
-                    "failed" => 0
-                ]
+            'count' => 0,
+            '_shards' => [
+                    'total' => 5,
+                    'successful' => 5,
+                    'failed' => 0,
+                ],
         ];
         $this->assertEquals($result, $data);
     }
@@ -79,7 +78,7 @@ class ElasticSearchTest extends TestCase
 
     /**
      * No abstract static methods
-     * So we make small coverage hack here
+     * So we make small coverage hack here.
      */
     public function testCoverageStatic()
     {

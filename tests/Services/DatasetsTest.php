@@ -39,7 +39,6 @@ class DatasetsTest extends TestCase
 
     public function testCountriesServiceUnavailable()
     {
-
         $this->setExpectedExceptionRegExp(
             ServiceUnavailableException::class,
             '/unavailable/i',

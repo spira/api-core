@@ -109,8 +109,7 @@ class TransformerTest extends TestCase
     public function testGetTransformer()
     {
         $service = $this->transformer->getService();
-        $getTransformer = function()
-        {
+        $getTransformer = function () {
             return $this->getTransformer();
         };
 
