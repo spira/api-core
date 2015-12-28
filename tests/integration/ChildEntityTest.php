@@ -133,14 +133,12 @@ class ChildEntityTest extends TestCase
         $this->assertResponseOk();
         $this->shouldReturnJson();
 
-        $this->assertTrue(is_object($object), 'Response is an object');
-
-        $this->assertObjectHasAttribute('entityId', $object);
-        $this->assertTrue(Uuid::isValid($object->entityId));
+        $this->assertIsObject($object, ['entityId']);
+        $this->assertUuid($object->entityId);
         $this->assertTrue(strlen($object->entityId) === 36, 'UUID has 36 chars');
         $this->assertTrue(is_string($object->value), 'Varchar column type is text');
-
-        $this->assertEquals($childEntity->entity_id, $object->entityId);
+        
+        $this->assertObjectMatchesEntity($object, $childEntity, ['entity_id', 'value']);
     }
 
     public function testGetOneFallBackToParent()
@@ -158,10 +156,8 @@ class ChildEntityTest extends TestCase
         $this->assertResponseOk();
         $this->shouldReturnJson();
 
-        $this->assertTrue(is_object($object), 'Response is an object');
-
-        $this->assertObjectHasAttribute('entityId', $object);
-        $this->assertTrue(Uuid::isValid($object->entityId));
+        $this->assertIsObject($object, ['entityId']);
+        $this->assertUuid($object->entityId);
         $this->assertTrue(strlen($object->entityId) === 36, 'UUID has 36 chars');
         $this->assertTrue(is_string($object->value), 'Varchar column type is text');
 

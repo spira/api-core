@@ -12,6 +12,7 @@ namespace Spira\Core\tests\Extensions;
 
 use Laravel\Lumen\Testing\AssertionsTrait as BaseAssertionsTrait;
 use Rhumsaa\Uuid\Uuid;
+use Spira\Core\Model\Model\BaseModel;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 
@@ -89,6 +90,82 @@ trait AssertionsTrait
         $this->assertTrue(Uuid::isValid($uuid), 'Valid UUID');
 
         return $this;
+    }
+
+    /**
+     * Assert $object is an object and contains $attributes
+     *
+     * @param $object
+     * @param array $attributes
+     */
+    public function assertIsObject($object, $attributes = [])
+    {
+        $this->assertTrue(is_object($object));
+
+        foreach ($attributes as $attr) {
+            $this->assertObjectHasAttribute($attr, $object);
+        }
+    }
+
+    /**
+     * Assert $array is an array and contains $attributes
+     * @param $array
+     * @param array $attributes
+     */
+    public function assertIsArray($array, $attributes = [])
+    {
+        $this->assertTrue(is_array($array));
+
+        foreach ($attributes as $attr) {
+            $this->assertArrayHasKey($attr, $array);
+        }
+    }
+
+    /**
+     * Assert object and entity has the same values for provided array of fields.
+     * Entity fields converted to snake_case, response object's fields are converted to camelCase
+     *
+     * @param \stdClass $object
+     * @param BaseModel $entity
+     * @param $fields
+     */
+    public function assertObjectMatchesEntity(\stdClass $object, BaseModel $entity, array $fields)
+    {
+        foreach ($fields as $field) {
+            $snake = snake_case($field);
+            $camel = camel_case($field);
+
+            $this->assertObjectHasAttribute($camel, $object, "Object has {$field} attribute");
+            $this->assertTrue(isset($entity->{$snake}), "Entity has {$field} attribute"); // Need to use isset because of underlying magic :-/
+
+            $this->assertEquals($entity->{$snake}, $object->{$camel}, "\$entity->{$snake} and \$object->{$camel} values are equal");
+        }
+    }
+
+    /**
+     * Compares two arrays values, but ignores keys and order
+     * If $strict is false it checks only that $actual array contains all $expected values,
+     * otherwise it checks that both has no difference
+     *
+     * @param array $expected array of expected values
+     * @param array $response array of items or values to compare
+     * @param string|bool $field column to pluck from response. If null $response values compared itself
+     * @param bool $strict
+     */
+    public function assertArrayEquals(array $expected, array $response, $field = null, $strict = true)
+    {
+        $this->assertNotEmpty($expected, '$expected array is not empty');
+        $this->assertNotEmpty($response, '$actual array is not empty');
+
+        if ($field) {
+            $response = array_pluck($response, $field);
+        }
+
+        $this->assertEmpty(array_diff($response, $expected), 'All values from $expected presents in $actual');
+
+        if ($strict) {
+            $this->assertEmpty(array_diff($expected, $response), 'All values from $actual presents in $expected');
+        }
     }
 
     /**
