@@ -109,9 +109,11 @@ class ChildEntityTest extends TestCase
         $this->getJson('/test/entities/'.$entity->entity_id.'/children');
 
         $this->assertResponseOk();
-        $this->shouldReturnJson();
-        $this->assertJsonArray();
-        $this->assertJsonMultipleEntries();
+
+        $items = $this->getJsonResponseAsArray();
+
+        $this->assertNotEmpty($items);
+        $this->assertIsArray($items[0], ['entityId']);
     }
 
     public function testGetOneNotFoundParent()
