@@ -38,7 +38,7 @@ class LinkedEntityTest extends TestCase
 
         $response = $this->getJsonResponseAsArray();
 
-        $this->assertEmpty(array_diff(array_pluck($response, 'entityId'), $ids));
+        $this->assertArrayEquals($ids, $response, 'entityId');
     }
 
     public function testAttachOne()
@@ -70,7 +70,7 @@ class LinkedEntityTest extends TestCase
         $this->postJson('test/many/'.$entity->entity_id.'/children', $factory->transformed());
 
         $this->assertResponseStatus(201);
-        $this->assertEmpty(array_diff($entity->secondTestEntities()->get()->pluck('entity_id')->toArray(), $ids));
+        $this->assertArrayEquals($ids, $entity->secondTestEntities()->get()->pluck('entity_id')->toArray());
     }
 
     public function testSyncMany()
@@ -90,11 +90,10 @@ class LinkedEntityTest extends TestCase
 
         $this->assertCount(4, array_pluck($this->getJsonResponseAsArray(), '_self'));
 
-        $this->assertEmpty(
-            array_diff(
-                $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
-                array_pluck($transformed, 'entityId')
-            )
+        $this->assertArrayEquals(
+            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
+            $transformed,
+            'entityId'
         );
     }
 
