@@ -93,7 +93,7 @@ trait AssertionsTrait
     }
 
     /**
-     * Assert $object is an object and contains $attributes
+     * Assert $object is an object and contains $attributes.
      *
      * @param $object
      * @param array $attributes
@@ -108,7 +108,7 @@ trait AssertionsTrait
     }
 
     /**
-     * Assert $array is an array and contains $attributes
+     * Assert $array is an array and contains $attributes.
      * @param $array
      * @param array $attributes
      */
@@ -123,7 +123,7 @@ trait AssertionsTrait
 
     /**
      * Assert object and entity has the same values for provided array of fields.
-     * Entity fields converted to snake_case, response object's fields are converted to camelCase
+     * Entity fields converted to snake_case, response object's fields are converted to camelCase.
      *
      * @param \stdClass $object
      * @param BaseModel $entity
@@ -145,7 +145,7 @@ trait AssertionsTrait
     /**
      * Compares two arrays values, but ignores keys and order
      * If $strict is false it checks only that $actual array contains all $expected values,
-     * otherwise it checks that both has no difference
+     * otherwise it checks that both has no difference.
      *
      * @param array $expected array of expected values
      * @param array $response array of items or values to compare
