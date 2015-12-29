@@ -59,6 +59,18 @@ class Localization extends BaseModel
     }
 
     /**
+     * Delete the model.
+     *
+     * @throws \Exception
+     */
+    public function delete()
+    {
+        \Cache::forget(self::getCacheKey($this->localizable_id, $this->region_code));
+
+        parent::delete();
+    }
+
+    /**
      * Get the cache key for this model.
      *
      * @param $entityId

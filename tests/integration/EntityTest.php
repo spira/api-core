@@ -850,6 +850,19 @@ class EntityTest extends TestCase
         $cachedLocalization = Localization::getFromCache($localizationModel->localizable_id, $localizationModel->region_code);
 
         $this->assertEquals($localization, $cachedLocalization);
+
+        $localizationCount = Localization::count();
+
+        // Give entity an empty localization
+        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/localizations/'.$region, []);
+        $this->assertResponseStatus(204);
+
+        // Ensure the localization has been deleted (and only one localization)
+        $this->assertEquals($entity->localizations()->where('region_code', $region)->count(), 0);
+        $this->assertEquals(Localization::count(), $localizationCount - 1);
+
+        // Check that the cached localization has been removed
+        $this->assertEquals(Localization::getFromCache($localizationModel->localizable_id, $localizationModel->region_code), null);
     }
 
     /**
