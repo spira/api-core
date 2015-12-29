@@ -21,7 +21,9 @@ class RouteHelperTest extends TestCase
     {
         $this->app->get('test/entities/{id}', ['as' => TestEntity::class, 'uses' => 'TestController@getOne']);
         $uuid = Uuid::uuid4();
-        $route = RouteHelper::getRoute(new TestEntity(['entity_id' => $uuid]));
+        $entity = new TestEntity(['entity_id' => $uuid]);
+        RouteHelper::$badRoutes = [];
+        $route = RouteHelper::getRoute($entity);
         $this->assertStringEndsWith('/test/entities/'.$uuid, $route);
     }
 

@@ -15,6 +15,7 @@ use Mockery as m;
 use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\Responder\Transformers\EloquentModelTransformer;
+use Spira\Core\Responder\TransformerService;
 
 /**
  * @property EloquentModelTransformer transformer
@@ -103,6 +104,20 @@ class TransformerTest extends TestCase
         $item = $this->transformer->transformItem(null);
 
         $this->assertTrue(is_null($item));
+    }
+
+    public function testGetTransformer()
+    {
+        $service = $this->transformer->getService();
+        $getTransformer = function () {
+            return $this->getTransformer();
+        };
+
+        $getTransformer = $getTransformer->bindTo($service, TransformerService::class);
+        $transformer = $getTransformer();
+        $this->assertInstanceOf(\CLosure::class, $transformer);
+
+        $this->assertEquals([1], $transformer(1));
     }
 
     public function testRelationSelf()
