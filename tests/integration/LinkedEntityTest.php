@@ -10,9 +10,9 @@
 
 namespace Spira\Core\tests\integration;
 
-use Spira\Core\Model\Test\SecondTestEntity;
-use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\tests\TestCase;
+use Spira\Core\Model\Test\TestEntity;
+use Spira\Core\Model\Test\SecondTestEntity;
 
 /**
  * Class LinkedEntityTest.
@@ -44,11 +44,30 @@ class LinkedEntityTest extends TestCase
     public function testAttachOne()
     {
         /** @var $entity TestEntity */
-        $entity = $this->getFactory(TestEntity::class)->create();
+        $entity  = $this->getFactory(TestEntity::class)->create();
         $factory = $this->getFactory(SecondTestEntity::class);
-        $second = $factory->create();
+        $second  = $factory->create();
 
-        $this->putJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id, $factory->transformed());
+        $transformed = $factory->transformed();
+        $transformed['value'] = 'ololo';
+
+        $this->putJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id, $transformed);
+
+        $this->assertResponseStatus(201);
+        $this->assertResponseHasNoContent();
+
+        $comparedEntity = $entity->secondTestEntities()->first();
+        $this->assertEquals($second->entity_id, $comparedEntity->entity_id);
+        $this->assertEquals('ololo', $comparedEntity->value);
+    }
+
+    public function testAttachOneWithoutRequestEntity()
+    {
+        /** @var $entity TestEntity */
+        $entity = $this->getFactory(TestEntity::class)->create();
+        $second = $this->getFactory(SecondTestEntity::class)->create();
+
+        $this->putJson('test/many/'.$entity->getKey().'/children/'.$second->getKey());
 
         $this->assertResponseStatus(201);
         $this->assertResponseHasNoContent();
@@ -111,6 +130,12 @@ class LinkedEntityTest extends TestCase
             $second->entity_id,
             $entity->secondTestEntities()->get()->pluck('entity_id')->toArray()
         );
+
+        // If entity does not attached it doesn't throws an error
+        $this->deleteJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
     }
 
     public function testDetachMany()
