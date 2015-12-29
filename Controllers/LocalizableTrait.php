@@ -57,7 +57,7 @@ trait LocalizableTrait
         // If there are no localizations, delete the localization if it exists
         // This can happen if the last localization for a region is removed
         if (empty($localizations)) {
-            $model->localizations()->where('region_code', '=', $region)->delete();
+            $model->localizations()->where('region_code', '=', $region)->first()->delete();
 
             return $this->getResponse()
                 ->transformer($this->getTransformer())
@@ -78,6 +78,14 @@ trait LocalizableTrait
 
         $parent = $this->findParentEntity($id);
         $childModel = $this->findOrFailChildEntity($childId, $parent);
+
+        if (empty($localizations)) {
+            $childModel->localizations()->where('region_code', '=', $region)->first()->delete();
+
+            return $this->getResponse()
+                ->transformer($this->getTransformer())
+                ->noContent();
+        }
 
         $createdLocalization = $this->validateAndSaveLocalizations($childModel, $localizations, $region);
 
