@@ -56,8 +56,9 @@ trait LocalizableTrait
 
         // If there are no localizations, delete the localization if it exists
         // This can happen if the last localization for a region is removed
-        if(empty($localizations)) {
+        if (empty($localizations)) {
             $model->localizations()->where('region_code', '=', $region)->delete();
+
             return $this->getResponse()
                 ->transformer($this->getTransformer())
                 ->noContent();
