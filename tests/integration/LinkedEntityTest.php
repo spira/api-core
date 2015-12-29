@@ -44,9 +44,9 @@ class LinkedEntityTest extends TestCase
     public function testAttachOne()
     {
         /** @var $entity TestEntity */
-        $entity  = $this->getFactory(TestEntity::class)->create();
+        $entity = $this->getFactory(TestEntity::class)->create();
         $factory = $this->getFactory(SecondTestEntity::class);
-        $second  = $factory->create();
+        $second = $factory->create();
 
         $transformed = $factory->transformed();
         $transformed['value'] = 'ololo';

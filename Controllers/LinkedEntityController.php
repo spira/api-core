@@ -35,7 +35,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $parent = $this->findParentEntity($id);
 
         $requestEntity = $request->json()->all();
-        if (!empty($requestEntity)) {
+        if (! empty($requestEntity)) {
             $childModel = $this->findOrNewChildEntity($childId, $parent);
             $this->validateRequest($requestEntity, $this->getValidationRules($childId, $requestEntity), $childModel, true);
             $childModel->fill($requestEntity)->save();
