@@ -10,8 +10,6 @@
 
 namespace Spira\Core\tests\integration;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ServerException;
 use Spira\Core\tests\TestCase;
 
 /**
@@ -62,5 +60,4 @@ class CorsTest extends TestCase
         $this->assertTrue(is_string($object->message), 'message attribute is text');
         $this->assertTrue($this->response->headers->has('access-control-allow-origin'), 'Access-Control-Allow-Origin header is set');
     }
-
 }
