@@ -30,7 +30,7 @@ class ValidationExceptionCollection extends HttpException implements Transformab
      * @param array $headers
      * @param int $code
      */
-    public function __construct(array $exceptions, $message = 'There was an issue with the validation of provided entity', \Exception $previous = null, array $headers = [], $code = 0)
+    public function __construct(array $exceptions, $message = 'There was an issue with the validation of provided entities', \Exception $previous = null, array $headers = [], $code = 0)
     {
         $this->exceptions = $exceptions;
 
