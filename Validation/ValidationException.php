@@ -58,16 +58,6 @@ class ValidationException extends HttpException implements  TransformableInterfa
     }
 
     /**
-     * Returns response headers.
-     *
-     * @return array Response headers
-     */
-    public function getHeaders()
-    {
-        return [];
-    }
-
-    /**
      * @param TransformerInterface $transformer
      * @return mixed
      */
