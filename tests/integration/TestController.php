@@ -33,6 +33,11 @@ class TestController extends EntityController
         return $this->getResponse()->item(['test' => $id]);
     }
 
+    public function cors()
+    {
+        return $this->getResponse()->item(['foo' => 'bar']);
+    }
+
     /**
      * Test a standard internal exception.
      */

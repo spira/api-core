@@ -20,7 +20,8 @@
     "bosnadev/database": "^0.11.0",
     "league/fractal": "0.12.*",
     "illuminate/mail": "^5.0",
-    "elasticquent/elasticquent": "1.1.*"
+    "elasticquent/elasticquent": "1.1.*",
+    "barryvdh/laravel-cors": "0.7.x"
   },
   "require-dev": {
     "satooshi/php-coveralls": "dev-master",

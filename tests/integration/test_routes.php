@@ -41,6 +41,8 @@ $app->group(['namespace' => 'Spira\Core\tests\integration', 'middleware' => 'req
 
 $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Application $app) {
 
+    $app->options('test/cors', 'TestController@cors');
+    $app->get('test/cors', 'TestController@cors');
     $app->get('test/internal-exception', 'TestController@internalException');
     $app->get('test/fatal-error', 'TestController@fatalError');
     $app->get('test/entities', 'TestController@getAll');
