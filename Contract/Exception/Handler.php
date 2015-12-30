@@ -72,7 +72,6 @@ class Handler extends ExceptionHandler
         ];
 
         if ($e instanceof HttpExceptionInterface) {
-
             if (method_exists($e, 'getResponse')) {
                 if ($e instanceof TransformableInterface) {
                     $responseData = $e->transform(\App::make(EloquentModelTransformer::class));
