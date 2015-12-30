@@ -54,7 +54,7 @@ trait RequestValidationTrait
             // @codeCoverageIgnoreEnd
         }
 
-        throw new ValidationException($validation->getMessageBag());
+        return new ValidationException($validation->getMessageBag());
     }
 
     /**
@@ -72,11 +72,7 @@ trait RequestValidationTrait
             if ($models->get($id)) {
                 $errors[] = null;
             } else {
-                try {
-                    throw $this->notFoundException($keyName);
-                } catch (ValidationException $e) {
-                    $errors[] = $e;
-                }
+                $errors[] = $this->notFoundException($keyName);
             }
         }
 

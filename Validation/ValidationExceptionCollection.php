@@ -22,19 +22,19 @@ class ValidationExceptionCollection extends HttpException implements Transformab
      */
     private $exceptions;
 
-    public function __construct(array $exceptions)
+    /**
+     * Create a new validation collection exception instance.
+     * @param array $exceptions
+     * @param string $message
+     * @param \Exception $previous
+     * @param array $headers
+     * @param int $code
+     */
+    public function __construct(array $exceptions, $message = 'There was an issue with the validation of provided entity', \Exception $previous = null, array $headers = [], $code = 0)
     {
         $this->exceptions = $exceptions;
-    }
 
-    /**
-     * Returns the status code.
-     *
-     * @return int An HTTP response status code
-     */
-    public function getStatusCode()
-    {
-        return Response::HTTP_UNPROCESSABLE_ENTITY;
+        parent::__construct(Response::HTTP_UNPROCESSABLE_ENTITY, $message, $previous, $headers, $code);
     }
 
     /**
@@ -63,7 +63,7 @@ class ValidationExceptionCollection extends HttpException implements Transformab
     public function transform(TransformerInterface $transformer)
     {
         return [
-            'message' => 'There was an issue with the validation of provided entity',
+            'message' => $this->getMessage(),
             'invalid' => $transformer->transformCollection($this->getResponse()),
         ];
     }
