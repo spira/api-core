@@ -11,6 +11,7 @@
 namespace Spira\Core\Contract\Exception;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Spira\Core\Responder\Contract\TransformableInterface;
 use Spira\Core\Responder\Transformers\EloquentModelTransformer;
@@ -66,28 +67,32 @@ class Handler extends ExceptionHandler
             'trace' => explode("\n", $e->getTraceAsString()),
         ];
 
-        $response = [
+        $responseData = [
             'message' => $message,
         ];
 
-        $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR; //default
-
         if ($e instanceof HttpExceptionInterface) {
-            $statusCode = $e->getStatusCode();
-
             if (method_exists($e, 'getResponse')) {
                 if ($e instanceof TransformableInterface) {
-                    $response = $e->transform(\App::make(EloquentModelTransformer::class));
+                    $responseData = $e->transform(\App::make(EloquentModelTransformer::class));
                 } else {
-                    $response = $e->getResponse();
+                    $responseData = $e->getResponse();
                 }
             }
         }
 
         if ($debug) {
-            $response['debug'] = $debugData;
+            $responseData['debug'] = $debugData;
         }
 
-        return response()->json($response, $statusCode, [], JSON_PRETTY_PRINT);
+        $response = parent::render($request, $e);
+
+        $response = new JsonResponse($responseData, $response->getStatusCode(), $response->headers->all(), JSON_PRETTY_PRINT);
+
+        $response->exception = $e;
+
+        app('Asm89\Stack\CorsService')->addActualRequestHeaders($response, $request);
+
+        return $response;
     }
 }

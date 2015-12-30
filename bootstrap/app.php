@@ -32,6 +32,7 @@ $app->withFacades();
 $app->withEloquent();
 
 $app->configure('regions');
+$app->configure('cors');
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +68,7 @@ $app->singleton(
 
 $app->middleware([
     Spira\Core\Middleware\TransformInputDataMiddleware::class,
-
+    Barryvdh\Cors\HandleCors::class,
 ]);
 
 $app->routeMiddleware([
@@ -86,9 +87,10 @@ $app->routeMiddleware([
 | totally optional, so you are not required to uncomment this line.
 |
 */
-$app->register(Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+$app->register(Barryvdh\Cors\LumenServiceProvider::class);
 $app->register(Spira\Core\Providers\AppServiceProvider::class);
 $app->register(Bosnadev\Database\DatabaseServiceProvider::class);
+$app->register(Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

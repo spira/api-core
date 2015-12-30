@@ -28,20 +28,16 @@ class ValidationException extends HttpException implements  TransformableInterfa
     /**
      * Create a new validation exception instance.
      * @param MessageBag $errors
+     * @param string $message
+     * @param \Exception $previous
+     * @param array $headers
+     * @param int $code
      */
-    public function __construct(MessageBag $errors)
+    public function __construct(MessageBag $errors, $message = 'There was an issue with the validation of provided entity', \Exception $previous = null, array $headers = [], $code = 0)
     {
         $this->errors = $errors->toArray();
-    }
 
-    /**
-     * Returns the status code.
-     *
-     * @return int An HTTP response status code
-     */
-    public function getStatusCode()
-    {
-        return Response::HTTP_UNPROCESSABLE_ENTITY;
+        parent::__construct(Response::HTTP_UNPROCESSABLE_ENTITY, $message, $previous, $headers, $code);
     }
 
     /**
@@ -52,19 +48,9 @@ class ValidationException extends HttpException implements  TransformableInterfa
     public function getResponse()
     {
         return [
-            'message' => 'There was an issue with the validation of provided entity',
+            'message' => $this->getMessage(),
             'invalid' => $this->errors,
         ];
-    }
-
-    /**
-     * Returns response headers.
-     *
-     * @return array Response headers
-     */
-    public function getHeaders()
-    {
-        return [];
     }
 
     /**
