@@ -30,5 +30,4 @@ class SpiraApplication extends Application
         return parent::getMonologHandler();
         // @codeCoverageIgnoreEnd
     }
-
 }
