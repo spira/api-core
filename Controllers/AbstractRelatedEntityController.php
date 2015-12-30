@@ -151,7 +151,7 @@ abstract class AbstractRelatedEntityController extends ApiController
     protected function findOrNewChildEntity($id, BaseModel $parent)
     {
         try {
-            return $this->getRelation($parent)->findOrFail($id);
+            return $this->fetchChildFromRelation($id, $parent);
         } catch (ModelNotFoundException $e) {
             return $this->getChildModel()->newInstance();
         }
@@ -165,10 +165,19 @@ abstract class AbstractRelatedEntityController extends ApiController
     protected function findOrFailChildEntity($id, BaseModel $parent)
     {
         try {
-            return $this->getRelation($parent)->findOrFail($id);
+            return $this->fetchChildFromRelation($id, $parent);
         } catch (ModelNotFoundException $e) {
             throw $this->notFoundException($this->getChildModel()->getKeyName());
         }
+    }
+
+    /**
+     * @return BaseModel
+     * @throws ModelNotFoundException
+     */
+    protected function fetchChildFromRelation($id, BaseModel $parent)
+    {
+        return $this->getRelation($parent)->findOrFail($id);
     }
 
     /**

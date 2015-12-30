@@ -11,6 +11,7 @@
 namespace Spira\Core\Controllers;
 
 use Illuminate\Http\Request;
+use Spira\Core\Model\Model\BaseModel;
 use Spira\Core\Responder\Response\ApiResponse;
 
 abstract class LinkedEntityController extends AbstractRelatedEntityController
@@ -32,11 +33,16 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
     public function attachOne(Request $request, $id, $childId)
     {
         $parent = $this->findParentEntity($id);
-        $childModel = $this->findOrNewChildEntity($childId, $parent);
 
         $requestEntity = $request->json()->all();
-        $this->validateRequest($requestEntity, $this->getValidationRules($childId, $requestEntity), $childModel, true);
-        $childModel->fill($requestEntity);
+        if (! empty($requestEntity)) {
+            $childModel = $this->findOrNewChildEntity($childId, $parent);
+            $this->validateRequest($requestEntity, $this->getValidationRules($childId, $requestEntity), $childModel, true);
+            $childModel->fill($requestEntity)->save();
+        } else {
+            $childModel = $this->findOrFailChildEntity($childId, $parent);
+        }
+
         $this->checkPermission(static::class.'@attachOne', ['model' => $parent, 'children' => $childModel]);
 
         $this->getRelation($parent)->attach($childModel, $this->getPivotValues($childModel));
@@ -101,5 +107,10 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         })->toArray();
 
         return $this->getResponse()->collection($responseCollection, ApiResponse::HTTP_CREATED);
+    }
+
+    protected function fetchChildFromRelation($id, BaseModel $parent)
+    {
+        return $this->getRelation($parent)->getModel()->findOrFail($id);
     }
 }
