@@ -61,7 +61,7 @@ abstract class EntityController extends ApiController
         $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
 
         if ($request->has('q')) {
-            $collection = $this->searchAllEntities(base64_decode($request->query('q')), $limit, $offset, $totalCount);
+            $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
         } else {
             $collection = $this->getAllEntities($limit, $offset);
         }
@@ -367,9 +367,8 @@ abstract class EntityController extends ApiController
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
 
-        $queryArray = json_decode($query, true);
-        if (is_array($queryArray)) { // Complex query
-            $searchResults = $this->complexSearch($queryArray);
+        if (is_array($query)) { // Complex query
+            $searchResults = $this->complexSearch($query);
         } else {
             $searchResults = $model->searchByQuery([
                 'match_phrase_prefix' => [
@@ -396,9 +395,9 @@ abstract class EntityController extends ApiController
     }
 
     /**
-     * @param $model
-     * @param $queryArray
+     * @param array $queryArray
      * @return mixed
+     * @internal param $model
      */
     protected function complexSearch(array $queryArray)
     {

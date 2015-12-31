@@ -203,7 +203,7 @@ class EntityTest extends TestCase
 
         $this->app->instance(TestEntity::class, $mockModel);
 
-        $this->getJson('/test/entities/pages?q='.base64_encode('foobar'), ['Range' => 'entities=0-']);
+        $this->getJson('/test/entities/pages?q='.base64_encode(json_encode('foobar')), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
@@ -244,6 +244,9 @@ class EntityTest extends TestCase
         $this->assertResponseStatus(404);
     }
 
+    /**
+     * @group testing
+     */
     public function testGetAllPaginatedComplexSearchMatchAll()
     {
         $results = $this->getFactory(TestEntity::class)->count(5)->make();
@@ -797,7 +800,7 @@ class EntityTest extends TestCase
 
         sleep(1); //give the elastic search agent time to index
 
-        $this->getJson('/test/entities/pages?q='.base64_encode('searchforthisstring'), ['Range' => 'entities=0-9']);
+        $this->getJson('/test/entities/pages?q=searchforthisstring', ['Range' => 'entities=0-9']);
 
         $collection = json_decode($this->response->getContent());
         $this->assertResponseStatus(206);
@@ -811,7 +814,7 @@ class EntityTest extends TestCase
 
     public function testEntitySearchNoResults()
     {
-        $this->getJson('/test/entities/pages?q='.base64_encode('thisstringwontreturnresults'), ['Range' => 'entities=0-9']);
+        $this->getJson('/test/entities/pages?q=thisstringwontreturnresults', ['Range' => 'entities=0-9']);
 
         $this->assertResponseStatus(404);
         $this->shouldReturnJson();
