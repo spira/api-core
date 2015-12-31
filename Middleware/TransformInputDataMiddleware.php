@@ -59,14 +59,13 @@ class TransformInputDataMiddleware
     }
 
     /**
-     * Transform the input to snake_case keys and process encoded input values
+     * Transform the input to snake_case keys and process encoded input values.
      * @param Request $request
      * @param ParameterBag $input
      */
     protected function transformRequestInput(Request $request, ParameterBag $input)
     {
         foreach ($input as $key => $value) {
-
             $value = $this->extractEncodedJson($input, $key, $value);
 
             // Handle snakecase conversion in sub arrays
@@ -87,9 +86,8 @@ class TransformInputDataMiddleware
         }
     }
 
-
     /**
-     * If the input is both base64 encoded and json encoded extract it to array
+     * If the input is both base64 encoded and json encoded extract it to array.
      * @param ParameterBag $input
      * @param $key
      * @param $value
@@ -99,26 +97,26 @@ class TransformInputDataMiddleware
     {
 
         //if it's not a string it can't be base64 encoded, exit early
-        if (!is_string($value)){
+        if (! is_string($value)) {
             return $value;
         }
 
         $decoded = base64_decode($value, true);
 
         //strict mode above allows for a quick check to see if the value is not encoded
-        if (!$decoded){
+        if (! $decoded) {
             return $value;
         }
 
         $jsonParsed = json_decode($decoded, true);
 
         //if value couldn't be json decoded, it wasn't valid json, return the original value
-        if (!$jsonParsed){
+        if (! $jsonParsed) {
             return $value;
         }
 
         $input->set($key, $jsonParsed);
+
         return $jsonParsed;
     }
-
 }
