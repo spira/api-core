@@ -10,6 +10,7 @@
 
 namespace Spira\Core\tests;
 
+use Faker\Provider\cs_CZ\DateTime;
 use Spira\Core\Model\Model\DataModel;
 use Spira\Core\Model\Model\VirtualModel;
 use Spira\Core\Model\Test\TestEntity;
@@ -77,6 +78,20 @@ class ModelTest extends TestCase
 
         $this->assertEquals('baz', $pk);
     }
+
+    /**
+     * @group testing
+     */
+    public function testGetIndexedDocumentDataReturnsStringDates()
+    {
+        $model = new TestEntity;
+        $model->date = \Carbon\Carbon::create();
+
+        $indexData = $model->getIndexDocumentData();
+
+        $this->assertInternalType('string', $indexData['date']);
+    }
+
 }
 
 class MockVirtualPK extends VirtualModel

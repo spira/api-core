@@ -244,9 +244,6 @@ class EntityTest extends TestCase
         $this->assertResponseStatus(404);
     }
 
-    /**
-     * @group testing
-     */
     public function testGetAllPaginatedComplexSearchMatchAll()
     {
         $results = $this->getFactory(TestEntity::class)->count(5)->make();

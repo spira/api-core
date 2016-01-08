@@ -59,6 +59,10 @@ class TestEntity extends IndexedModel implements LocalizableModelInterface
         self::UPDATED_AT => 'datetime',
     ];
 
+    protected $dates = [
+        'date'
+    ];
+
     public static function getValidationRules($entityId = null, array $requestEntity = [])
     {
         $hash = ! empty($requestEntity['hash']) ? $requestEntity['hash'] : '';

@@ -1,46 +1,54 @@
 {
-  "name": "spira/core",
-  "description": "Spira app core",
-  "keywords": [
-    "framework",
-    "laravel",
-    "lumen"
-  ],
-  "license": "MIT",
-  "type": "project",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/spira/Elasticquent"
+    "name": "spira/core",
+    "description": "Spira app core",
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
+    "license": "MIT",
+    "type": "project",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/spira/Elasticquent"
+        },
+        {
+            "type": "vcs",
+            "url": "http://github.com/spira/Database"
+        }
+    ],
+    "require": {
+        "laravel/lumen-framework": "5.2.*",
+        "vlucas/phpdotenv": "~1.0",
+        "bosnadev/database": "dev-feature/lumen-5.2 as 0.12.0",
+        "league/fractal": "0.12.*",
+        "illuminate/mail": "^5.0",
+        "elasticquent/elasticquent": "1.1.*",
+        "barryvdh/laravel-cors": "0.7.x"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master",
+        "phpunit/phpunit": "~4.0",
+        "mockery/mockery": "^0.9.4",
+        "fzaninotto/faker": "^1.4",
+        "guzzlehttp/guzzle": "6.1.*",
+        "barryvdh/laravel-ide-helper": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spira\\Core\\": ""
+        },
+        "classmap": [
+            "database/"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "php artisan ide-helper:generate"
+        ]
     }
-  ],
-  "require": {
-    "laravel/lumen-framework": "5.1.*",
-    "vlucas/phpdotenv": "~1.0",
-    "bosnadev/database": "^0.11.0",
-    "league/fractal": "0.12.*",
-    "illuminate/mail": "^5.0",
-    "elasticquent/elasticquent": "1.1.*",
-    "barryvdh/laravel-cors": "0.7.x"
-  },
-  "require-dev": {
-    "satooshi/php-coveralls": "dev-master",
-    "phpunit/phpunit": "~4.0",
-    "mockery/mockery": "^0.9.4",
-    "fzaninotto/faker": "^1.4",
-    "guzzlehttp/guzzle": "5.3.*",
-    "barryvdh/laravel-ide-helper": "dev-master"
-  },
-  "autoload": {
-    "psr-4": { "Spira\\Core\\": "" },
-    "classmap": ["database/"]
-  },
-  "config": {
-    "preferred-install": "dist"
-  },
-  "scripts": {
-    "post-update-cmd": [
-      "php artisan ide-helper:generate"
-    ]
-  }
 }
