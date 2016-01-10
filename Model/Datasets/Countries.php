@@ -38,11 +38,11 @@ class Countries extends Dataset
      * @param  Client $client
      * @param CacheRepository $cache
      */
-    public function __construct(Client $client, CacheRepository $cache)
+    public function __construct(Client $client)
     {
         $this->client = $client;
 
-        parent::__construct($cache);
+        parent::__construct();
     }
 
     /**
@@ -53,6 +53,7 @@ class Countries extends Dataset
     protected function getDataset()
     {
         try {
+            /** @var Client $client */
             $client = new $this->client;
             $response = $client->get($this->getEndpoint());
         } catch (ClientException $e) {
@@ -61,7 +62,7 @@ class Countries extends Dataset
 
         $countries = new Collection;
 
-        foreach ($response->json() as $country) {
+        foreach (json_decode($response->getBody(), true) as $country) {
             $countries->push([
                 'country_name' => $country['name'],
                 'country_code' => $country['alpha2Code'],

@@ -10,7 +10,7 @@
 
 namespace Spira\Core\tests\Extensions;
 
-use Laravel\Lumen\Testing\AssertionsTrait as BaseAssertionsTrait;
+use Laravel\Lumen\Testing\Concerns\MakesHttpRequests as MakesHttpRequests;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\BaseModel;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
@@ -21,8 +21,8 @@ use Symfony\Component\VarDumper\Dumper\CliDumper;
  */
 trait AssertionsTrait
 {
-    use BaseAssertionsTrait {
-        BaseAssertionsTrait::assertResponseStatus as baseAssertResponseStatus;
+    use MakesHttpRequests {
+        MakesHttpRequests::assertResponseStatus as baseAssertResponseStatus;
     }
 
     /**

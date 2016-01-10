@@ -74,7 +74,7 @@ class ExceptionTest extends TestCase
         $webserverPort = getenv('WEBSERVER_PORT');
 
         $request = new Client([
-            'base_url' => "http://$webserverIp:$webserverPort",
+            'base_uri' => "http://$webserverIp:$webserverPort",
         ]);
 
         try {

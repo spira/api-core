@@ -12,7 +12,6 @@ namespace Spira\Core\Controllers;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Laravel\Lumen\Routing\ValidatesRequests;
 use Spira\Core\Contract\Exception\BadRequestException;
 use Spira\Core\Model\Model\BaseModel;
 use Spira\Core\Validation\ValidationException;
@@ -21,8 +20,11 @@ use Spira\Core\Validation\Validator;
 
 trait RequestValidationTrait
 {
-    use ValidatesRequests;
 
+    protected function getValidationFactory()
+    {
+        return app('validator');
+    }
     /**
      * @param $entityCollection
      * @param string $keyName

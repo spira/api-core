@@ -114,6 +114,23 @@ class TestCase extends LumenTestCase
     }
 
     /**
+     * Make a request of any type
+     * @param $method
+     * @param $uri
+     * @param $content
+     * @param array $headers
+     * @return $this
+     */
+    public function makeRequest($method, $uri, $content = null, array $headers = [])
+    {
+        $server = $this->transformHeadersToServerVars($headers);
+
+        $this->call($method, $uri, [], [], [], $server, $content);
+
+        return $this;
+    }
+
+    /**
      * @param array $headers
      * @param $content
      * @return array

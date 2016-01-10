@@ -79,9 +79,6 @@ class ModelTest extends TestCase
         $this->assertEquals('baz', $pk);
     }
 
-    /**
-     * @group testing
-     */
     public function testGetIndexedDocumentDataReturnsStringDates()
     {
         $model = new TestEntity;
