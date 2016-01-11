@@ -21,7 +21,7 @@
     "require": {
         "laravel/lumen-framework": "5.2.*",
         "vlucas/phpdotenv": "~1.0",
-        "bosnadev/database": "dev-feature/lumen-5.2 as 0.12.0",
+        "bosnadev/database": "0.13.0",
         "league/fractal": "0.12.*",
         "illuminate/mail": "^5.0",
         "elasticquent/elasticquent": "1.1.*",

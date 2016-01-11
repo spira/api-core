@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7e3e9f48116e5b0de6dc5b52ec62ab9c",
-    "content-hash": "4e5edeebb34f1612095856b43f1a4269",
+    "hash": "c09991bd0dedab7a67cfdadd76db172a",
+    "content-hash": "998b328dc51f3376ceb888106e59d1d8",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -101,16 +101,16 @@
         },
         {
             "name": "bosnadev/database",
-            "version": "dev-feature/lumen-5.2",
+            "version": "0.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spira/Database.git",
-                "reference": "6c5680c6202f48c98196ab38f0b12be644b05273"
+                "reference": "7e4a46df9c907da01b0ae959852de9e74a3611dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spira/Database/zipball/6c5680c6202f48c98196ab38f0b12be644b05273",
-                "reference": "6c5680c6202f48c98196ab38f0b12be644b05273",
+                "url": "https://api.github.com/repos/spira/Database/zipball/7e4a46df9c907da01b0ae959852de9e74a3611dd",
+                "reference": "7e4a46df9c907da01b0ae959852de9e74a3611dd",
                 "shasum": ""
             },
             "require": {
@@ -158,9 +158,9 @@
                 "postgresql"
             ],
             "support": {
-                "source": "https://github.com/spira/Database/tree/feature/lumen-5.2"
+                "source": "https://github.com/spira/Database/tree/0.13"
             },
-            "time": "2016-01-08 07:20:57"
+            "time": "2016-01-11 03:33:37"
         },
         {
             "name": "doctrine/inflector",
@@ -4516,17 +4516,9 @@
             "time": "2015-12-26 13:39:53"
         }
     ],
-    "aliases": [
-        {
-            "alias": "0.12.0",
-            "alias_normalized": "0.12.0.0",
-            "version": "dev-feature/lumen-5.2",
-            "package": "bosnadev/database"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "bosnadev/database": 20,
         "satooshi/php-coveralls": 20,
         "barryvdh/laravel-ide-helper": 20
     },
