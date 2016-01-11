@@ -25,7 +25,6 @@ abstract class Dataset
 
     /**
      * Assign dependencies.
-     *
      */
     public function __construct()
     {

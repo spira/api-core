@@ -10,7 +10,6 @@
 
 namespace Spira\Core\tests;
 
-use Faker\Provider\cs_CZ\DateTime;
 use Spira\Core\Model\Model\DataModel;
 use Spira\Core\Model\Model\VirtualModel;
 use Spira\Core\Model\Test\TestEntity;
@@ -88,7 +87,6 @@ class ModelTest extends TestCase
 
         $this->assertInternalType('string', $indexData['date']);
     }
-
 }
 
 class MockVirtualPK extends VirtualModel

@@ -60,7 +60,7 @@ class TestEntity extends IndexedModel implements LocalizableModelInterface
     ];
 
     protected $dates = [
-        'date'
+        'date',
     ];
 
     public static function getValidationRules($entityId = null, array $requestEntity = [])
