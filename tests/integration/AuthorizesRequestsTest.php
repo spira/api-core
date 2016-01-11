@@ -20,7 +20,7 @@ class AuthorizesRequestsTest extends TestCase
             require __DIR__.'/test_routes.php'; // $app is used in required file!
         });
 
-        app()->extend(Gate::class, function(){
+        app()->extend(Gate::class, function () {
             return Mockery::mock(Gate::class);
         });
     }
