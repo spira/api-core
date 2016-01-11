@@ -224,4 +224,14 @@ class TestCase extends LumenTestCase
     {
         return $this->requestJson('DELETE', $uri, $data, $headers);
     }
+
+    /**
+     * Assert status code, and on failure print the output to assist debugging.
+     *
+     * @param int $code
+     */
+    public function assertResponseStatus($code)
+    {
+        $this->assertResponseStatusWithDebug($code);
+    }
 }

@@ -10,8 +10,8 @@
 
 namespace Spira\Core\tests\Extensions;
 
-use Laravel\Lumen\Testing\Concerns\MakesHttpRequests as MakesHttpRequests;
 use Rhumsaa\Uuid\Uuid;
+use PHPUnit_Framework_Assert as PHPUnit;
 use Spira\Core\Model\Model\BaseModel;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
@@ -21,10 +21,6 @@ use Symfony\Component\VarDumper\Dumper\CliDumper;
  */
 trait AssertionsTrait
 {
-    use MakesHttpRequests {
-        MakesHttpRequests::assertResponseStatus as baseAssertResponseStatus;
-    }
-
     /**
      * Assert the response is a JSON array.
      *
@@ -196,7 +192,7 @@ trait AssertionsTrait
     public function assertException($message, $statusCode, $exception)
     {
         $body = json_decode($this->response->getContent());
-        $this->assertResponseStatus($statusCode);
+        $this->assertResponseStatusWithDebug($statusCode);
         $this->assertContains($message, $body->message);
         $this->assertContains($exception, $body->debug->exception);
     }
@@ -205,10 +201,12 @@ trait AssertionsTrait
      * Assert status code, and on failure print the output to assist debugging.
      * @param int $code
      */
-    public function assertResponseStatus($code)
+    public function assertResponseStatusWithDebug($code)
     {
         try {
-            $this->baseAssertResponseStatus($code);
+            $actual = $this->response->getStatusCode();
+
+            return $this->assertEquals($code, $actual, "Expected status code {$code}, got {$actual}.");
         } catch (\PHPUnit_Framework_ExpectationFailedException $e) {
             $content = $this->response->getContent();
 
