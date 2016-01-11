@@ -114,7 +114,7 @@ class TestCase extends LumenTestCase
     }
 
     /**
-     * Make a request of any type
+     * Make a request of any type.
      * @param $method
      * @param $uri
      * @param $content
