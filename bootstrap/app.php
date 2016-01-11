@@ -90,7 +90,6 @@ $app->routeMiddleware([
 $app->register(Barryvdh\Cors\LumenServiceProvider::class);
 $app->register(Spira\Core\Providers\AppServiceProvider::class);
 $app->register(Bosnadev\Database\DatabaseServiceProvider::class);
-$app->register(Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
