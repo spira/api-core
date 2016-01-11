@@ -20,11 +20,11 @@ use Spira\Core\Validation\Validator;
 
 trait RequestValidationTrait
 {
-
     protected function getValidationFactory()
     {
         return app('validator');
     }
+
     /**
      * @param $entityCollection
      * @param string $keyName
