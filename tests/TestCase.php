@@ -239,7 +239,7 @@ class TestCase extends LumenTestCase
 
     /**
      * Assert that a given string is seen on the page.
-     * Copypasted from 5.2 Laravel's \Illuminate\Foundation\Testing\Concerns\InteractsWithPages::see
+     * Copypasted from 5.2 Laravel's \Illuminate\Foundation\Testing\Concerns\InteractsWithPages::see.
      *
      * @param  string  $text
      * @param  bool  $negate
