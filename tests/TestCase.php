@@ -225,13 +225,39 @@ class TestCase extends LumenTestCase
         return $this->requestJson('DELETE', $uri, $data, $headers);
     }
 
-    /**
-     * Assert status code, and on failure print the output to assist debugging.
-     *
-     * @param int $code
-     */
+    /** @inherit */
     public function assertResponseStatus($code)
     {
         $this->assertResponseStatusWithDebug($code);
+    }
+
+    /** @inherit */
+    public function assertResponseOk()
+    {
+        $this->assertResponseStatus(200);
+    }
+
+    /**
+     * Assert that a given string is seen on the page.
+     * Copypasted from 5.2 Laravel's \Illuminate\Foundation\Testing\Concerns\InteractsWithPages::see
+     *
+     * @param  string  $text
+     * @param  bool  $negate
+     * @return $this
+     */
+    protected function see($text, $negate = false)
+    {
+        $method = $negate ? 'assertNotRegExp' : 'assertRegExp';
+
+        $rawPattern = preg_quote($text, '/');
+
+        $escapedPattern = preg_quote(e($text), '/');
+
+        $pattern = $rawPattern == $escapedPattern
+            ? $rawPattern : "({$rawPattern}|{$escapedPattern})";
+
+        $this->$method("/$pattern/i", $this->response->getContent());
+
+        return $this;
     }
 }
