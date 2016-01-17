@@ -34,6 +34,7 @@ class CreateTestEntitiesTable extends Migration
                 $table->boolean('nullable')->nullable();
                 $table->text('text');
                 $table->date('date');
+                $table->dateTime('time');
                 $table->boolean('multi_word_column_title');
                 $table->boolean('hidden');
                 $table->json('json');
