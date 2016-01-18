@@ -35,7 +35,7 @@ class TestEntity extends IndexedModel implements LocalizableModelInterface
      *
      * @var array
      */
-    protected $fillable = ['entity_id', 'varchar', 'hash', 'integer', 'decimal', 'boolean', 'nullable', 'text', 'date', 'multi_word_column_title', 'hidden', 'json'];
+    protected $fillable = ['entity_id', 'varchar', 'hash', 'integer', 'decimal', 'boolean', 'nullable', 'text', 'date', 'time', 'multi_word_column_title', 'hidden', 'json'];
 
     /**
      * The attributes excluded from the model's JSON form.
