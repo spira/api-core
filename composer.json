@@ -11,10 +11,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/spira/Elasticquent"
-        },
-        {
-            "type": "vcs",
             "url": "http://github.com/spira/database"
         }
     ],
@@ -24,7 +20,7 @@
         "bosnadev/database": "0.13.0",
         "league/fractal": "0.12.*",
         "illuminate/mail": "^5.0",
-        "elasticquent/elasticquent": "1.1.*",
+        "elasticquent/elasticquent": "1.0.*",
         "barryvdh/laravel-cors": "0.7.x",
         "guzzlehttp/guzzle": "6.1.*"
     },
