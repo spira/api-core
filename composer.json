@@ -20,6 +20,7 @@
         "bosnadev/database": "0.13.0",
         "league/fractal": "0.12.*",
         "illuminate/mail": "^5.0",
+        "elasticsearch/elasticsearch": "~1.0",
         "elasticquent/elasticquent": "1.0.*",
         "barryvdh/laravel-cors": "0.7.x",
         "guzzlehttp/guzzle": "6.1.*"
