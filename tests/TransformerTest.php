@@ -72,6 +72,7 @@ class TransformerTest extends TestCase
         $collection = $this->transformer->transformCollection($entities);
 
         $this->assertCount(3, $collection);
+        $this->checkItem($collection[0]);
     }
 
     public function testItem()
@@ -80,7 +81,7 @@ class TransformerTest extends TestCase
 
         $item = $this->transformer->transformItem($entity);
 
-        $this->assertTrue(is_array($item));
+        $this->checkItem($item);
     }
 
     public function testTransfomerService()
@@ -142,5 +143,18 @@ class TransformerTest extends TestCase
         foreach ($data['_testMany'] as $value) {
             $this->assertArrayHasKey('_self', $value);
         }
+    }
+
+    protected function checkItem($item)
+    {
+        $this->assertTrue(is_array($item));
+
+        $this->assertArrayHasKey('date', $item);
+        $date = \DateTime::createFromFormat('Y-m-d', $item['date']);
+        $this->assertNotEmpty($date, 'Date is short formatted');
+
+        $this->assertArrayHasKey('time', $item);
+        $date = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $item['time']); // Format "c" does not working
+        $this->assertNotEmpty($date, 'Time is ISO formatted');
     }
 }

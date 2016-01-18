@@ -54,6 +54,7 @@ class TestEntity extends IndexedModel implements LocalizableModelInterface
     protected $casts = [
         'decimal'    => 'float',
         'date'       => 'date',
+        'time'       => 'datetime',
         'json'       => 'json',
         self::CREATED_AT => 'datetime',
         self::UPDATED_AT => 'datetime',

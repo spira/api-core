@@ -24,6 +24,7 @@ $factory->define(TestEntity::class, function (\Faker\Generator $faker) {
         'nullable' => null,
         'text' => $faker->paragraph(3),
         'date' => $faker->date(),
+        'time' => $faker->dateTime,
         'multi_word_column_title' => true,
         'hidden' => $faker->boolean(),
         'json' => [

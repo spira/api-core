@@ -109,13 +109,14 @@ class EloquentModelTransformer extends BaseTransformer
         }
 
         $castType = $castTypes[$key];
+        if (in_array($castType, ['date', 'datetime'])) {
+            $date = new Carbon($value);
 
-        if ($value instanceof Carbon) {
             switch ($castType) {
                 case 'date':
-                    return $value->format('Y-m-d');
+                    return $date->format('Y-m-d');
                 default:
-                    return $value->toIso8601String();
+                    return $date->toIso8601String();
             }
         }
 
