@@ -84,7 +84,7 @@ class ChildEntityTest extends TestCase
      */
     public function testMissingRelationName()
     {
-        $transformerService = \App::make(TransformerService::class);
+        $transformerService = app(TransformerService::class);
         $transformer = new EloquentModelTransformer($transformerService);
 
         new MockMissingRelationNameController(new TestEntity, $transformer);
@@ -95,7 +95,7 @@ class ChildEntityTest extends TestCase
      */
     public function testInvalidRelationName()
     {
-        $transformerService = \App::make(TransformerService::class);
+        $transformerService = app(TransformerService::class);
         $transformer = new EloquentModelTransformer($transformerService);
 
         new MockInvalidRelationNameController(new TestEntity, $transformer);

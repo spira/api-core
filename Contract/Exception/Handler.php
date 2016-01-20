@@ -12,10 +12,13 @@ namespace Spira\Core\Contract\Exception;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Spira\Core\Responder\Contract\TransformableInterface;
+use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Spira\Core\Responder\Transformers\EloquentModelTransformer;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class Handler extends ExceptionHandler
@@ -26,7 +29,10 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        'Symfony\Component\HttpKernel\Exception\HttpException',
+        AuthorizationException::class,
+        HttpException::class,
+        ModelNotFoundException::class,
+        ValidationException::class,
     ];
 
     /**
@@ -74,7 +80,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof HttpExceptionInterface) {
             if (method_exists($e, 'getResponse')) {
                 if ($e instanceof TransformableInterface) {
-                    $responseData = $e->transform(\App::make(EloquentModelTransformer::class));
+                    $responseData = $e->transform(app(EloquentModelTransformer::class));
                 } else {
                     $responseData = $e->getResponse();
                 }

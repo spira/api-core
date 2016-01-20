@@ -114,6 +114,23 @@ class TestCase extends LumenTestCase
     }
 
     /**
+     * Make a request of any type.
+     * @param $method
+     * @param $uri
+     * @param $content
+     * @param array $headers
+     * @return $this
+     */
+    public function makeRequest($method, $uri, $content = null, array $headers = [])
+    {
+        $server = $this->transformHeadersToServerVars($headers);
+
+        $this->call($method, $uri, [], [], [], $server, $content);
+
+        return $this;
+    }
+
+    /**
      * @param array $headers
      * @param $content
      * @return array
@@ -206,5 +223,41 @@ class TestCase extends LumenTestCase
     public function deleteJson($uri, array $data = [], array $headers = [])
     {
         return $this->requestJson('DELETE', $uri, $data, $headers);
+    }
+
+    /** @inherit */
+    public function assertResponseStatus($code)
+    {
+        $this->assertResponseStatusWithDebug($code);
+    }
+
+    /** @inherit */
+    public function assertResponseOk()
+    {
+        $this->assertResponseStatus(200);
+    }
+
+    /**
+     * Assert that a given string is seen on the page.
+     * Copypasted from 5.2 Laravel's \Illuminate\Foundation\Testing\Concerns\InteractsWithPages::see.
+     *
+     * @param  string  $text
+     * @param  bool  $negate
+     * @return $this
+     */
+    protected function see($text, $negate = false)
+    {
+        $method = $negate ? 'assertNotRegExp' : 'assertRegExp';
+
+        $rawPattern = preg_quote($text, '/');
+
+        $escapedPattern = preg_quote(e($text), '/');
+
+        $pattern = $rawPattern == $escapedPattern
+            ? $rawPattern : "({$rawPattern}|{$escapedPattern})";
+
+        $this->$method("/$pattern/i", $this->response->getContent());
+
+        return $this;
     }
 }

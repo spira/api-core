@@ -1,46 +1,50 @@
 {
-  "name": "spira/core",
-  "description": "Spira app core",
-  "keywords": [
-    "framework",
-    "laravel",
-    "lumen"
-  ],
-  "license": "MIT",
-  "type": "project",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/spira/Elasticquent"
+    "name": "spira/core",
+    "description": "Spira app core",
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
+    "license": "MIT",
+    "type": "project",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "http://github.com/spira/database"
+        }
+    ],
+    "require": {
+        "laravel/lumen-framework": "5.2.*",
+        "vlucas/phpdotenv": "~1.0",
+        "bosnadev/database": "0.13.0",
+        "league/fractal": "0.12.*",
+        "illuminate/mail": "^5.0",
+        "elasticsearch/elasticsearch": "~1.0",
+        "elasticquent/elasticquent": "1.0.*",
+        "barryvdh/laravel-cors": "0.7.x",
+        "guzzlehttp/guzzle": "6.1.*"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.0",
+        "satooshi/php-coveralls": "dev-master",
+        "phpunit/phpunit": "~4.0",
+        "mockery/mockery": "^0.9.4",
+        "fzaninotto/faker": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spira\\Core\\": ""
+        },
+        "classmap": [
+            "database/"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "scripts": {
+        "post-update-cmd": [
+        ]
     }
-  ],
-  "require": {
-    "laravel/lumen-framework": "5.1.*",
-    "vlucas/phpdotenv": "~1.0",
-    "bosnadev/database": "^0.11.0",
-    "league/fractal": "0.12.*",
-    "illuminate/mail": "^5.0",
-    "elasticquent/elasticquent": "1.1.*",
-    "barryvdh/laravel-cors": "0.7.x"
-  },
-  "require-dev": {
-    "satooshi/php-coveralls": "dev-master",
-    "phpunit/phpunit": "~4.0",
-    "mockery/mockery": "^0.9.4",
-    "fzaninotto/faker": "^1.4",
-    "guzzlehttp/guzzle": "5.3.*",
-    "barryvdh/laravel-ide-helper": "dev-master"
-  },
-  "autoload": {
-    "psr-4": { "Spira\\Core\\": "" },
-    "classmap": ["database/"]
-  },
-  "config": {
-    "preferred-install": "dist"
-  },
-  "scripts": {
-    "post-update-cmd": [
-      "php artisan ide-helper:generate"
-    ]
-  }
 }

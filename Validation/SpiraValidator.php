@@ -11,6 +11,7 @@
 namespace Spira\Core\Validation;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Datasets\Countries;
 
@@ -82,11 +83,11 @@ class SpiraValidator extends Validator
      */
     protected function validateCountry($attribute, $value, $parameters)
     {
-        $countries = \App::make(Countries::class)
-            ->all()
-            ->toArray();
+        /** @var Countries $countriesDataSet */
+        $countriesDataSet = app(Countries::class);
+        $countries = $countriesDataSet->all()->toArray();
 
-        return in_array($value, array_fetch($countries, 'country_code'));
+        return in_array($value, array_pluck($countries, 'country_code'));
     }
 
     /**

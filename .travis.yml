@@ -23,7 +23,7 @@ before_script:
   # rest of the stuff
   - psql -c 'create database spira;' -U postgres
   - php artisan migrate
-  - php artisan serve --port 8008 --host 127.0.0.1 --quiet 2>&1 >/dev/null &
+  - php -S 127.0.0.1:8008 ./server.php 2>&1 >/dev/null &
 
 script:
   - php ./vendor/bin/phpunit --colors --configuration ./phpunit.xml --coverage-clover=./reports/coverage/clover.xml

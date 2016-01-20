@@ -77,6 +77,16 @@ class ModelTest extends TestCase
 
         $this->assertEquals('baz', $pk);
     }
+
+    public function testGetIndexedDocumentDataReturnsStringDates()
+    {
+        $model = new TestEntity;
+        $model->date = \Carbon\Carbon::create();
+
+        $indexData = $model->getIndexDocumentData();
+
+        $this->assertInternalType('string', $indexData['date']);
+    }
 }
 
 class MockVirtualPK extends VirtualModel

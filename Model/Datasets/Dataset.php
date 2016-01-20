@@ -10,6 +10,7 @@
 
 namespace Spira\Core\Model\Datasets;
 
+use Illuminate\Support\Facades\Cache;
 use ReflectionClass;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
@@ -24,12 +25,10 @@ abstract class Dataset
 
     /**
      * Assign dependencies.
-     *
-     * @param  CacheRepository  $cache
      */
-    public function __construct(CacheRepository $cache)
+    public function __construct()
     {
-        $this->cache = $cache;
+        $this->cache = Cache::store();
     }
 
     /**

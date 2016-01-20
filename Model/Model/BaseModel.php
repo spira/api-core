@@ -12,8 +12,10 @@ namespace Spira\Core\Model\Model;
 
 use Bosnadev\Database\Traits\UuidTrait;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spira\Core\Model\Collection\Collection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -46,6 +48,51 @@ abstract class BaseModel extends Model
     ];
 
     protected static $validationRules = [];
+
+    /**
+     * Temporary fix of polymorphic relation naming.
+     *
+     * @see https://github.com/laravel/framework/issues/10501#issuecomment-162705813
+     *
+     * @inherit
+     */
+    public function morphTo($name = null, $type = null, $id = null)
+    {
+        // Get the name of the relation from the function name.
+        list($current, $caller) = debug_backtrace(false, 2);
+        $relation = Str::camel($caller['function']);
+
+        // If no name is provided, we will use the name of the relation
+        // since that is most likely the name of the polymorphic interface. We can
+        // use that to get both the class and foreign key that will be utilized.
+        if (is_null($name)) {
+            $name = Str::snake($relation);
+        }
+
+        list($type, $id) = $this->getMorphs($name, $type, $id);
+
+        // If the type value is null it is probably safe to assume we're eager loading
+        // the relationship. When that is the case we will pass in a dummy query as
+        // there are multiple types in the morph and we can't use single queries.
+        if (is_null($class = $this->$type)) {
+            return new MorphTo(
+                $this->newQuery(), $this, $id, null, $type, $relation
+            );
+        }
+
+        // If we are not eager loading the relationship we will essentially treat this
+        // as a belongs-to style relationship since morph-to extends that class and
+        // we will pass in the appropriate values so that it behaves as expected.
+        else {
+            $class = $this->getActualClassNameForMorph($class);
+
+            $instance = new $class;
+
+            return new MorphTo(
+                $instance->newQuery(), $this, $id, $instance->getKeyName(), $type, $relation
+            );
+        }
+    }
 
     /**
      * @param null $entityId

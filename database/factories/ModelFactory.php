@@ -8,10 +8,12 @@
  * For the full copyright and license information, please view the LICENSE file that was distributed with this source code.
  */
 
-use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
+use Illuminate\Support\Facades\Hash;
+use Spira\Core\Model\Test\SecondTestEntity;
 
 $factory->define(TestEntity::class, function (\Faker\Generator $faker) {
+
     return [
         'entity_id' => $faker->uuid,
         'varchar' => $faker->word,
@@ -22,6 +24,7 @@ $factory->define(TestEntity::class, function (\Faker\Generator $faker) {
         'nullable' => null,
         'text' => $faker->paragraph(3),
         'date' => $faker->date(),
+        'time' => $faker->dateTime,
         'multi_word_column_title' => true,
         'hidden' => $faker->boolean(),
         'json' => [
