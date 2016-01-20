@@ -50,7 +50,7 @@ abstract class BaseModel extends Model
     protected static $validationRules = [];
 
     /**
-     * Temporary fix of polymorphic relation naming
+     * Temporary fix of polymorphic relation naming.
      *
      * @see https://github.com/laravel/framework/issues/10501#issuecomment-162705813
      *
