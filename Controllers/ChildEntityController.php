@@ -193,6 +193,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
             $relation->saveMany($childModels);
         }
 
+        $parent->touch(); // See to-do comment in postMany function above.
+
         $this->postSync($parent, $childModels);
 
         return $this->getResponse()
