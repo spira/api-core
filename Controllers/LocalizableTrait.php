@@ -60,7 +60,7 @@ trait LocalizableTrait
             $previous = $model->localizations()->where('region_code', '=', $region)->first();
 
             //only delete if is a Localization
-            if ($previous instanceof Localization){
+            if ($previous instanceof Localization) {
                 $previous->delete();
             }
 
