@@ -13,7 +13,7 @@ namespace Spira\Core\Responder\Transformers;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Spira\Core\Helpers\RouteHelper;
-use Spira\Core\Model\Collection\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Spira\Core\Model\Model\BaseModel;
 use Spira\Core\Model\Model\LocalizableModelInterface;
 use Spira\Core\Model\Model\Localization;
@@ -66,20 +66,7 @@ class EloquentModelTransformer extends BaseTransformer
             }
         }
 
-        foreach ($array as $key => $value) {
-
-            // Handle snakecase conversion in sub arrays
-            if (is_array($value) || is_object($value)) {
-                $value = $this->renameKeys((array) $value);
-                $array[$key] = $value;
-            }
-
-            // Find any potential snake_case keys in the 'root' array, and
-            // convert them to camelCase
-            if (is_string($key) && str_contains($key, '_')) {
-                $array = $this->renameArrayKey($array, $key, $this->camelCase($key));
-            }
-        }
+        $array = $this->handleCase($array);
 
         if (($object instanceof BaseModel)) {
             if ($this->addSelfKey) {
@@ -160,6 +147,39 @@ class EloquentModelTransformer extends BaseTransformer
     }
 
     /**
+     * @param $array
+     * @return mixed
+     */
+    protected function handleCase($array)
+    {
+        foreach ($array as $key => $value) {
+            $this->handleSnakeCase($array, $key, $value);
+        }
+
+        return $array;
+    }
+
+    /**
+     * @param $array
+     * @param $key
+     * @param $value
+     */
+    protected function handleSnakeCase(&$array, $key, $value)
+    {
+        // Handle snakecase conversion in sub arrays
+        if (is_array($value) || is_object($value)) {
+            $value = $this->renameKeys((array) $value);
+            $array[$key] = $value;
+        }
+
+        // Find any potential snake_case keys in the 'root' array, and
+        // convert them to camelCase
+        if (is_string($key) && str_contains($key, '_')) {
+            $array = $this->renameArrayKey($array, $key, $this->camelCase($key));
+        }
+    }
+
+    /**
      * Recursively rename keys in nested arrays.
      *
      * @param  array  $array
@@ -215,6 +235,7 @@ class EloquentModelTransformer extends BaseTransformer
                 /** @var TransformerInterface $transformer */
                 $transformer = $this->getTransformerForNested($relation);
                 $childTransformed = null;
+
                 if ($childModelOrCollection instanceof Collection) {
                     $childTransformed = $transformer->transformCollection($childModelOrCollection, $this->options);
                 } else {
