@@ -245,7 +245,6 @@ abstract class BaseModel extends Model
      */
     protected function asDateTime($value)
     {
-
         if ($value instanceof Carbon) {
             return $value;
         }
