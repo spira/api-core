@@ -245,8 +245,6 @@ abstract class BaseModel extends Model
      */
     protected function asDateTime($value)
     {
-        dd($value);
-
         if (! $value) {
             return;
         }
