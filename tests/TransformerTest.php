@@ -87,7 +87,7 @@ class TransformerTest extends TestCase
     public function testCastNullDatetime()
     {
         $entity = factory(TestEntity::class)->make([
-            'time' => null
+            'time' => null,
         ]);
 
         $item = $this->transformer->transformItem($entity);

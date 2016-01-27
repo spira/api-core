@@ -248,7 +248,7 @@ abstract class BaseModel extends Model
         dd($value);
 
         if (! $value) {
-            return null;
+            return;
         }
 
         if ($value instanceof Carbon) {
