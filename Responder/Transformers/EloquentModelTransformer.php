@@ -96,7 +96,7 @@ class EloquentModelTransformer extends BaseTransformer
         }
 
         $castType = $castTypes[$key];
-        if (in_array($castType, ['date', 'datetime'])) {
+        if ($value && in_array($castType, ['date', 'datetime'])) {
             $date = new Carbon($value);
 
             switch ($castType) {
