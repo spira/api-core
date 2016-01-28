@@ -84,6 +84,17 @@ class TransformerTest extends TestCase
         $this->checkItem($item);
     }
 
+    public function testCastNullDatetime()
+    {
+        $entity = factory(TestEntity::class)->make([
+            'time' => null,
+        ]);
+
+        $item = $this->transformer->transformItem($entity);
+
+        $this->assertEmpty($item['time']);
+    }
+
     public function testTransfomerService()
     {
         $checkArray = ['item' => 'foo'];
