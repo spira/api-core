@@ -15,10 +15,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Spira\Core\Responder\Transformers\ValidationExceptionTransformer;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Spira\Core\Responder\Contract\TransformableInterface;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
-use Spira\Core\Responder\Transformers\EloquentModelTransformer;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class Handler extends ExceptionHandler
@@ -80,7 +80,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof HttpExceptionInterface) {
             if (method_exists($e, 'getResponse')) {
                 if ($e instanceof TransformableInterface) {
-                    $responseData = $e->transform(app(EloquentModelTransformer::class));
+                    $responseData = $e->transform(app(ValidationExceptionTransformer::class));
                 } else {
                     $responseData = $e->getResponse();
                 }
