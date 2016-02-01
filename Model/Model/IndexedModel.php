@@ -125,7 +125,7 @@ abstract class IndexedModel extends BaseModel
                 $results = $this->$nestedModelName()->getResults();
                 if ($results instanceof Collection) {
                     $nestedData = [];
-                    foreach($results as $result) {
+                    foreach ($results as $result) {
                         $nestedData[] = array_intersect_key($result->attributesToArray(), $result->mappingProperties);
                     }
                     $relations[snake_case($nestedModelName)] = $nestedData;
