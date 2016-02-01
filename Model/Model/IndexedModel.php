@@ -124,7 +124,7 @@ abstract class IndexedModel extends BaseModel
                 /** @var IndexedModel|IndexedCollection $results */
                 $results = $this->$nestedModelName()->getResults();
                 if ($results instanceof Collection) {
-                    $nestedData = $results->map(function(IndexedModel $result) {
+                    $nestedData = $results->map(function (IndexedModel $result) {
                         return array_intersect_key($result->attributesToArray(), $result->mappingProperties);
                     });
 
