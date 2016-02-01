@@ -87,6 +87,24 @@ class ModelTest extends TestCase
 
         $this->assertInternalType('string', $indexData['date']);
     }
+
+    public function testIndexDocumentDataFiltersMappingProperties()
+    {
+        $model = $this->getFactory(TestEntity::class)->make();
+
+        $indexedAttributes = $model->getAttributes();
+
+        // Remove attributes not present in mappingProperties
+        unset($indexedAttributes['json']);
+        unset($indexedAttributes['nullable']);
+        unset($indexedAttributes['time']);
+        unset($indexedAttributes['hidden']);
+
+        // Convert 'date' into string
+        $indexedAttributes['date'] = $indexedAttributes['date']->toDateTimeString();
+
+        $this->assertEquals($indexedAttributes, $model->getIndexDocumentData());
+    }
 }
 
 class MockVirtualPK extends VirtualModel
