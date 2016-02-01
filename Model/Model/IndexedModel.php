@@ -105,6 +105,14 @@ abstract class IndexedModel extends BaseModel
         return $instance->getElasticSearchClient()->count($params);
     }
 
+    /**
+     * Get entity data which is to be entered into search index.
+     *
+     * Note: Every entity, including it's nested entities, requires mappingProperties to be defined in it's model
+     * or it will not be indexed correctly.
+     *
+     * @return array
+     */
     public function getIndexDocumentData()
     {
         $relations = [];
@@ -113,12 +121,16 @@ abstract class IndexedModel extends BaseModel
             // We have to do this because we don't know if the relation is one to or one to many. If it is one to one
             // we don't want to strip out the keys.
             foreach ($this->indexRelations as $nestedModelName) {
+                /** @var IndexedModel|IndexedCollection $results */
                 $results = $this->$nestedModelName()->getResults();
-
                 if ($results instanceof Collection) {
-                    $relations[snake_case($nestedModelName)] = array_values($results->toArray());
+                    $nestedData = [];
+                    foreach($results as $result) {
+                        $nestedData[] = array_intersect_key($result->attributesToArray(), $result->mappingProperties);
+                    }
+                    $relations[snake_case($nestedModelName)] = $nestedData;
                 } else {
-                    $relations[snake_case($nestedModelName)] = $results->toArray();
+                    $relations[snake_case($nestedModelName)] = array_intersect_key($results->attributesToArray(), $results->mappingProperties);
                 }
             }
         }
