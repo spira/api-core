@@ -10,7 +10,6 @@
 
 namespace Spira\Core\Model\Model;
 
-use Carbon\Carbon;
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Spira\Core\Model\Collection\IndexedCollection;
