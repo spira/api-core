@@ -10,7 +10,6 @@
 
 namespace Spira\Core\Model\Model;
 
-use Carbon\Carbon;
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Spira\Core\Model\Collection\IndexedCollection;
@@ -116,7 +115,6 @@ abstract class IndexedModel extends BaseModel
             foreach ($this->indexRelations as $nestedModelName) {
                 $results = $this->$nestedModelName()->getResults();
 
-                // @Todo: Have to transform instances of Carbon into date-times
                 if ($results instanceof Collection) {
                     $relations[snake_case($nestedModelName)] = array_values($results->toArray());
                 } else {
@@ -125,7 +123,8 @@ abstract class IndexedModel extends BaseModel
             }
         }
 
-        $attributes = $this->attributesToArray();
+        // Only include attributes present in mappingProperties
+        $attributes = array_intersect_key($this->attributesToArray(), $this->mappingProperties);
 
         return array_merge($attributes, $relations);
     }

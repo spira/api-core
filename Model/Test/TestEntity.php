@@ -64,6 +64,37 @@ class TestEntity extends IndexedModel implements LocalizableModelInterface
         'date',
     ];
 
+    protected $mappingProperties = [ // Excluded properties 'json', 'nullable', 'time' and 'hidden'
+        'entity_id' => [
+            'type' => 'string',
+            'index' => 'no',
+        ],
+        'varchar' => [
+            'type' => 'string',
+        ],
+        'hash' => [
+            'type' => 'string',
+        ],
+        'integer' => [
+            'type' => 'long',
+        ],
+        'decimal' => [
+            'type' => 'double',
+        ],
+        'boolean' => [
+            'type' => 'boolean',
+        ],
+        'text' => [
+            'type' => 'string',
+        ],
+        'date' => [
+            'type' => 'string',
+        ],
+        'multi_word_column_title' => [
+            'type' => 'boolean',
+        ],
+    ];
+
     public static function getValidationRules($entityId = null, array $requestEntity = [])
     {
         $hash = ! empty($requestEntity['hash']) ? $requestEntity['hash'] : '';
