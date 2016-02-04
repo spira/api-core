@@ -122,9 +122,8 @@ abstract class ApiController extends Controller
         return $requestEntity[$entityModel->getPrimaryKey()];
     }
 
-
     /**
-     * Override for custom functionality
+     * Override for custom functionality.
      *
      * @param BaseModel $model
      * @param $requestEntity
@@ -136,7 +135,7 @@ abstract class ApiController extends Controller
     }
 
     /**
-     *  Override for custom functionality
+     *  Override for custom functionality.
      *
      * @param $baseModel $model
      * @param Collection|BaseModel[] $existingModels
