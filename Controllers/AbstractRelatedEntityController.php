@@ -59,8 +59,9 @@ abstract class AbstractRelatedEntityController extends ApiController
     /**
      * Function called before child models are synced with parent.
      *
-     * @param $model
-     * @param $parent
+     * @param BaseModel $parent
+     * @param Collection $children
+     * @internal param $model
      */
     protected function preSync(BaseModel $parent, Collection $children)
     {
@@ -69,8 +70,9 @@ abstract class AbstractRelatedEntityController extends ApiController
     /**
      * Function called before response is sent after the model has been updated via sync.
      *
-     * @param $model
-     * @param $parent
+     * @param BaseModel $parent
+     * @param Collection $children
+     * @internal param $model
      */
     protected function postSync(BaseModel $parent, Collection $children)
     {
@@ -86,7 +88,7 @@ abstract class AbstractRelatedEntityController extends ApiController
     protected function getValidationRules($entityId = null, array $requestEntity = [])
     {
         $childRules = $this->getChildModel()->getValidationRules($entityId, $requestEntity);
-        $pivotRules = $this->getPivotValidationRules();
+        $pivotRules = $this->getPivotValidationRules($entityId, $requestEntity);
 
         return array_merge($childRules, $pivotRules);
     }
@@ -94,9 +96,11 @@ abstract class AbstractRelatedEntityController extends ApiController
     /**
      * Override this method to provide custom validation rules.
      *
+     * @param null $entityId
+     * @param array $requestEntity
      * @return array
      */
-    protected function getPivotValidationRules()
+    protected function getPivotValidationRules($entityId = null, array $requestEntity = [])
     {
         return [];
     }
@@ -172,8 +176,9 @@ abstract class AbstractRelatedEntityController extends ApiController
     }
 
     /**
+     * @param $id
+     * @param BaseModel $parent
      * @return BaseModel
-     * @throws ModelNotFoundException
      */
     protected function fetchChildFromRelation($id, BaseModel $parent)
     {
@@ -205,7 +210,7 @@ abstract class AbstractRelatedEntityController extends ApiController
     /**
      * @param $requestCollection
      * @param BaseModel $parent
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     protected function findOrFailChildrenCollection($requestCollection, BaseModel $parent)
     {

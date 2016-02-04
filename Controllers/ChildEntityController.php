@@ -81,7 +81,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($id, $requestEntity));
 
-        $childModel->fill($request->json()->all());
+        $this->fillModel($childModel, $request->json()->all());
 
         $this->checkPermission(static::class.'@postOne', ['model' => $parent, 'children' => $childModel]);
 
@@ -108,10 +108,9 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $requestCollection = $request->json()->all();
         $this->validateRequestCollection($requestCollection, $this->getChildModel());
 
-        $existingChildModels = $this->findChildrenCollection($requestCollection, $parent);
+        $existingModels = $this->findChildrenCollection($requestCollection, $parent);
 
-        $childModels = $this->getChildModel()
-            ->hydrateRequestCollection($requestCollection, $existingChildModels);
+        $childModels = $this->fillModels($this->getChildModel(), $existingModels, $requestCollection);
 
         $this->checkPermission(static::class.'@postMany', ['model' => $parent, 'children' => $childModels]);
 
@@ -151,7 +150,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($childId, $requestEntity));
 
-        $childModel->fill($request->json()->all());
+        $this->fillModel($childModel, $request->json()->all());
 
         $this->checkPermission(static::class.'@putOne', ['model' => $parent, 'children' => $childModel]);
 
@@ -178,9 +177,9 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $requestCollection = $request->json()->all();
         $this->validateRequestCollection($requestCollection, $this->getChildModel());
 
-        $existingChildModels = $this->findChildrenCollection($requestCollection, $parent);
+        $existingModels = $this->findChildrenCollection($requestCollection, $parent);
 
-        $childModels = $this->getChildModel()->hydrateRequestCollection($requestCollection, $existingChildModels);
+        $childModels = $this->fillModels($this->getChildModel(), $existingModels, $requestCollection);
 
         $this->checkPermission(static::class.'@putMany', ['model' => $parent, 'children' => $childModels]);
 
@@ -227,7 +226,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($id, $requestEntity), $childModel);
 
-        $childModel->fill($request->json()->all());
+        $this->fillModel($childModel, $request->json()->all());
 
         $this->checkPermission(static::class.'@patchOne', ['model' => $parent, 'children' => $childModel]);
 
@@ -250,9 +249,9 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $this->validateRequestCollection($requestCollection, $this->getChildModel(), true);
 
         $parent = $this->findParentEntity($id);
-        $existingChildModels = $this->findOrFailChildrenCollection($requestCollection, $parent);
+        $existingModels = $this->findOrFailChildrenCollection($requestCollection, $parent);
 
-        $childModels = $this->getChildModel()->hydrateRequestCollection($requestCollection, $existingChildModels);
+        $childModels = $this->fillModels($this->getChildModel(), $existingModels, $requestCollection);
 
         $this->checkPermission(static::class.'@patchMany', ['model' => $parent, 'children' => $childModels]);
 

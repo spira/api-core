@@ -121,4 +121,30 @@ abstract class ApiController extends Controller
 
         return $requestEntity[$entityModel->getPrimaryKey()];
     }
+
+
+    /**
+     * Override for custom functionality
+     *
+     * @param BaseModel $model
+     * @param $requestEntity
+     * @return BaseModel
+     */
+    protected function fillModel(BaseModel $model, $requestEntity)
+    {
+        return $model->fill($requestEntity);
+    }
+
+    /**
+     *  Override for custom functionality
+     *
+     * @param $baseModel $model
+     * @param Collection|BaseModel[] $existingModels
+     * @param Collection|array $requestCollection
+     * @return Collection|array
+     */
+    protected function fillModels(BaseModel $baseModel, $existingModels, $requestCollection)
+    {
+        return $baseModel->hydrateRequestCollection($requestCollection, $existingModels);
+    }
 }
