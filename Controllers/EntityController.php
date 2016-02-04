@@ -138,7 +138,7 @@ abstract class EntityController extends ApiController
             $requestEntity,
             $this->getValidationRules($this->getKeyFromRequestEntity($this->getModel(), $requestEntity), $requestEntity)
         );
-        $model->fill($requestEntity);
+        $this->fillModel($model, $requestEntity);
         $this->checkPermission(static::class.'@postOne', ['model' => $model]);
         $model->save();
 
@@ -163,7 +163,7 @@ abstract class EntityController extends ApiController
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($id, $requestEntity));
 
-        $model->fill($request->json()->all());
+        $this->fillModel($model, $request->json()->all());
         $this->checkPermission(static::class.'@putOne', ['model' => $model]);
         $model->save();
 
@@ -186,8 +186,7 @@ abstract class EntityController extends ApiController
         $this->validateRequestCollection($requestCollection, $this->getModel());
         $existingModels = $this->findCollection($requestCollection);
 
-        $modelCollection = $this->getModel()
-            ->hydrateRequestCollection($requestCollection, $existingModels);
+        $modelCollection = $this->fillModels($this->getModel(), $existingModels, $requestCollection);
 
         $this->checkPermission(static::class.'@putMany', ['model' => $modelCollection]);
 
@@ -217,7 +216,7 @@ abstract class EntityController extends ApiController
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($id, $requestEntity), $model);
 
-        $model->fill($request->json()->all());
+        $this->fillModel($model, $request->json()->all());
         $this->checkPermission(static::class.'@patchOne', ['model' => $model]);
         $model->save();
 
@@ -238,8 +237,7 @@ abstract class EntityController extends ApiController
 
         $existingModels = $this->findOrFailCollection($requestCollection);
 
-        $modelsCollection = $this->getModel()
-            ->hydrateRequestCollection($requestCollection, $existingModels);
+        $modelsCollection = $this->fillModels($this->getModel(), $existingModels, $requestCollection);
 
         $this->checkPermission(static::class.'@patchMany', ['model' => $existingModels]);
 
@@ -328,6 +326,7 @@ abstract class EntityController extends ApiController
     }
 
     /**
+     * @param array $routeParams
      * @param null $limit
      * @param null $offset
      * @return Collection
@@ -522,7 +521,7 @@ abstract class EntityController extends ApiController
     }
 
     /**
-     * @param null $entityId
+     * @param null $entityKey
      * @param array $requestEntity
      * @return array
      */

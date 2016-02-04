@@ -38,7 +38,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         if (! empty($requestEntity)) {
             $childModel = $this->findOrNewChildEntity($childId, $parent);
             $this->validateRequest($requestEntity, $this->getValidationRules($childId, $requestEntity), $childModel, true);
-            $childModel->fill($requestEntity)->save();
+            $this->fillModel($childModel, $requestEntity)->save();
         } else {
             $childModel = $this->findOrFailChildEntity($childId, $parent);
         }
@@ -89,8 +89,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $this->validateRequestCollection($requestCollection, $this->getChildModel(), true);
 
         $existingChildren = $this->findChildrenCollection($requestCollection, $parent);
-        $childModels = $this->getChildModel()->hydrateRequestCollection($requestCollection, $existingChildren);
-
+        $childModels = $this->fillModels($this->getChildModel(), $existingChildren, $requestCollection);
         $this->checkPermission(static::class.'@'.$method.'Many', ['model' => $parent, 'children' => $childModels]);
 
         $this->preSync($parent, $childModels);
