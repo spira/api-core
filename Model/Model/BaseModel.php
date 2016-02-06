@@ -54,7 +54,7 @@ abstract class BaseModel extends Model
      *
      * @see https://github.com/laravel/framework/issues/10501#issuecomment-162705813
      *
-     * @inherit
+     * @inheritdoc
      */
     public function morphTo($name = null, $type = null, $id = null)
     {

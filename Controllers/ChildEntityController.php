@@ -318,7 +318,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
     protected function getValidationRules($entityId = null, array $requestEntity = [])
     {
         $childRules = $this->getChildModel()->getValidationRules($entityId, $requestEntity);
-        $pivotRules = $this->getPivotValidationRules();
+        $pivotRules = $this->getPivotValidationRules($entityId, $requestEntity);
 
         return array_merge($childRules, $pivotRules);
     }
@@ -336,7 +336,14 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         return $childId === false && ends_with($fk, $parentKey);
     }
 
-    protected function getPivotValidationRules()
+    /**
+     * Override this method to provide custom validation rules.
+     *
+     * @param null $entityId
+     * @param array $requestEntity
+     * @return array
+     */
+    protected function getPivotValidationRules($entityId = null, array $requestEntity = [])
     {
         return [];
     }
