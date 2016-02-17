@@ -129,8 +129,10 @@ abstract class IndexedModel extends BaseModel
                     });
 
                     $relations[snake_case($nestedModelName)] = $nestedData;
-                } else {
+                } else if ($results instanceof BaseModel) {
                     $relations[snake_case($nestedModelName)] = array_intersect_key($results->attributesToArray(), $results->mappingProperties);
+                } else { //fallback to direct assignment
+                    $relations[snake_case($nestedModelName)] = $results;
                 }
             }
         }
