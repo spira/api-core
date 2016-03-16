@@ -31,9 +31,9 @@ class ModelFactoryInstance implements Arrayable, Jsonable
     private $hide;
     private $entityType;
     private $appends = [];
-    /** @var  Collection|BaseModel */
+    /** @var Collection|BaseModel */
     private $predefinedEntities;
-    /** @var  Collection|BaseModel */
+    /** @var Collection|BaseModel */
     private $loadedEntities;
 
     /**

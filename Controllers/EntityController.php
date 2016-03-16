@@ -392,7 +392,6 @@ abstract class EntityController extends ApiController
 
         // Complex query
         if (is_array($query)) {
-
             $params = [
                 'index' => $model->getIndexName(),
                 'type' => $model->getTypeName(),
@@ -401,7 +400,6 @@ abstract class EntityController extends ApiController
 
         // Simple query
         } else {
-
             $params = $model->getBasicEsParams(true, true, true, $limit, $offset);
             $params['body']['query'] = [
                 'match_phrase_prefix' => [
@@ -413,10 +411,9 @@ abstract class EntityController extends ApiController
         return $this->customSearchConditions($params);
     }
 
-
     /**
      * Method for adding custom search conditions by overriding in controllers.
-     * Should return array for elasticsearch request for complexSearch method
+     * Should return array for elasticsearch request for complexSearch method.
      */
     protected function customSearchConditions($params)
     {
