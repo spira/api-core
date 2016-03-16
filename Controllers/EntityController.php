@@ -365,16 +365,8 @@ abstract class EntityController extends ApiController
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-
-        if (is_array($query)) { // Complex query
-            $searchResults = $this->complexSearch($query);
-        } else {
-            $searchResults = $model->searchByQuery([
-                'match_phrase_prefix' => [
-                    '_all' => $query,
-                ],
-            ], null, null, $limit, $offset);
-        }
+        $params = $this->convertQueryToElasticsearchRequest($query, $limit, $offset);
+        $searchResults = $model->complexSearch($params);
 
         if ($searchResults instanceof ElasticquentResultCollection) {
             $totalHits = $searchResults->totalHits();
@@ -393,24 +385,42 @@ abstract class EntityController extends ApiController
         return $searchResults;
     }
 
-    /**
-     * @param array $queryArray
-     * @return mixed
-     * @internal param $model
-     */
-    protected function complexSearch(array $queryArray)
+    protected function convertQueryToElasticsearchRequest($query, $limit = null, $offset = null)
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-        $searchResults = $model->complexSearch(
-            [
+
+        // Complex query
+        if (is_array($query)) {
+
+            $params = [
                 'index' => $model->getIndexName(),
                 'type' => $model->getTypeName(),
-                'body' => $this->translateQuery($queryArray),
-            ]
-        );
+                'body' => $this->translateQuery($query),
+            ];
 
-        return $searchResults;
+        // Simple query
+        } else {
+
+            $params = $model->getBasicEsParams(true, true, true, $limit, $offset);
+            $params['body']['query'] = [
+                'match_phrase_prefix' => [
+                    '_all' => $query,
+                ],
+            ];
+        }
+
+        return $this->customSearchConditions($params);
+    }
+
+
+    /**
+     * Method for adding custom search conditions by overriding in controllers.
+     * Should return array for elasticsearch request for complexSearch method
+     */
+    protected function customSearchConditions($params)
+    {
+        return $params;
     }
 
     /**

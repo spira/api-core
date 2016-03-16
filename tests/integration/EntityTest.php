@@ -185,23 +185,21 @@ class EntityTest extends TestCase
 
     public function testGetAllPaginatedSimpleSearch()
     {
-        // @todo wait for fix an issue with PHP 7.0.2 INF.0 https://github.com/padraic/mockery/issues/530
-        $this->markTestSkipped();
-
         $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
         $resultsMock->shouldReceive('totalHits')
             ->andReturn(0); // Force not found, we don't have to mock a success, just that 'searchByQuery' is called with the right params.
 
-        $mockModel = Mockery::mock(TestEntity::class);
+        $mockModel = Mockery::mock(TestEntity::class)->makePartial();
         $mockModel
             ->shouldReceive('count')
             ->andReturn(10)
-            ->shouldReceive('searchByQuery')
-            ->with([
-                'match_phrase_prefix' => [
-                    '_all' => 'foobar',
-                ],
-            ], null, null, 10, 0)
+            ->shouldReceive('complexSearch')
+            ->with(Mockery::on(function ($arr) {
+                    return is_array($arr)
+                        && $arr['size'] == 10
+                        && $arr['from'] == 0
+                        && $arr['body']['query']['match_phrase_prefix']['_all'] == 'foobar';
+                }))
             ->andReturn($resultsMock);
 
         $this->app->instance(TestEntity::class, $mockModel);
@@ -213,9 +211,6 @@ class EntityTest extends TestCase
 
     public function testGetAllPaginatedComplexSearch()
     {
-        // @todo wait for fix an issue with PHP 7.0.2 INF.0 https://github.com/padraic/mockery/issues/530
-        $this->markTestSkipped();
-
         $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
         $resultsMock->shouldReceive('totalHits')
             ->andReturn(0); // Force not found, we don't have to mock a success, just that 'searchByQuery' is called with the right params.
@@ -252,9 +247,6 @@ class EntityTest extends TestCase
 
     public function testGetAllPaginatedComplexSearchMatchAll()
     {
-        // @todo wait for fix an issue with PHP 7.0.2 INF.0 https://github.com/padraic/mockery/issues/530
-        $this->markTestSkipped();
-
         $results = $this->getFactory(TestEntity::class)->count(5)->make();
 
         $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
