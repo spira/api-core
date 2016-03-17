@@ -57,6 +57,48 @@ class EntityTest extends TestCase
         });
     }
 
+    public function dataCustomSearchApplied()
+    {
+        return [
+            ['body.query.match_phrase_prefix._all', 'foobar'], // Simple search
+            ['body.query.bool.must.0.match_phrase_prefix.author_id', ['authorId' => ['foobar']]], // Complex search
+        ];
+    }
+
+    /**
+     * @dataProvider dataCustomSearchApplied
+     *
+     * @see \Spira\Core\tests\integration\TestController::customSearchConditions()
+     */
+    public function testCustomSearchApplied($arr_path, $query, $value = 'foobar')
+    {
+        // Force not found, we don't have to mock a success, just that 'searchByQuery' is called with the right params.
+        $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
+        $resultsMock->shouldReceive('totalHits')->andReturn(0);
+
+        $mockModel = Mockery::mock(TestEntity::class)->makePartial();
+        $mockModel
+            ->shouldReceive('count')
+            ->andReturn(10)
+            ->shouldReceive('complexSearch')
+            ->with(Mockery::on(function ($arr) use ($arr_path, $value) {
+                return is_array($arr)
+                    && array_get($arr, $arr_path) == $value // Check does query processed correctly
+                    && $arr['custom_search'] == 'some_value'; // Check does custom rules are applied
+            }))
+            ->andReturn($resultsMock);
+
+        $this->app->instance(TestEntity::class, $mockModel);
+
+        $params = [
+            'q' => base64_encode(json_encode($query)),
+            'custom_search' => 1,
+        ];
+        $this->getJson('/test/entities/search?' . http_build_query($params), [ 'Range' => 'entities=0-' ]);
+
+        $this->assertResponseStatus(404);
+    }
+
     public function testSetTimeCarbon()
     {
         $entity = new TestEntity();
@@ -183,7 +225,18 @@ class EntityTest extends TestCase
         $this->assertEquals($last, 19);
     }
 
-    public function testGetAllPaginatedSimpleSearch()
+    public function dataSearchPaths()
+    {
+        return [
+            ['/test/entities/pages'],
+            ['/test/entities/search'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataSearchPaths
+     */
+    public function testGetAllPaginatedSimpleSearch($path)
     {
         $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
         $resultsMock->shouldReceive('totalHits')
@@ -204,12 +257,15 @@ class EntityTest extends TestCase
 
         $this->app->instance(TestEntity::class, $mockModel);
 
-        $this->getJson('/test/entities/pages?q='.base64_encode(json_encode('foobar')), ['Range' => 'entities=0-']);
+        $this->getJson($path . '?q='.base64_encode(json_encode('foobar')), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
 
-    public function testGetAllPaginatedComplexSearch()
+    /**
+     * @dataProvider dataSearchPaths
+     */
+    public function testGetAllPaginatedComplexSearch($path)
     {
         $resultsMock = Mockery::mock(ElasticquentResultCollection::class);
         $resultsMock->shouldReceive('totalHits')
@@ -240,12 +296,15 @@ class EntityTest extends TestCase
             ],
         ];
 
-        $this->getJson('/test/entities/pages?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
+        $this->getJson($path . '?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
 
-    public function testGetAllPaginatedComplexSearchMatchAll()
+    /**
+     * @dataProvider dataSearchPaths
+     */
+    public function testGetAllPaginatedComplexSearchMatchAll($path)
     {
         $results = $this->getFactory(TestEntity::class)->count(5)->make();
 
@@ -283,9 +342,19 @@ class EntityTest extends TestCase
             'authorId' => [''],
         ];
 
-        $this->getJson('/test/entities/pages?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
+        $this->getJson($path . '?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(206);
+    }
+
+    public function testSearchPaginatedListingProhibitedError()
+    {
+        $this->getJson('/test/entities/search', ['Range' => 'entities=0-']);
+
+        $this->assertResponseStatus(Response::HTTP_BAD_REQUEST);
+        $result = $this->getJsonResponseAsArray();
+
+        $this->assertEquals('Items listing not allowed', $result['message']);
     }
 
     public function testPaginationBadRanges()

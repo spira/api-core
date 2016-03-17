@@ -14,6 +14,7 @@ use Elasticquent\ElasticquentResultCollection;
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Spira\Core\Contract\Exception\BadRequestException;
 use Spira\Core\Model\Collection\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spira\Core\Model\Model\BaseModel;
@@ -54,24 +55,14 @@ abstract class EntityController extends ApiController
             ->collection($collection);
     }
 
-    public function getAllPaginated(Request $request, RangeRequest $rangeRequest)
+    public function searchPaginated(RangeRequest $rangeRequest)
     {
-        $totalCount = $this->countEntities();
-        $limit = $rangeRequest->getLimit($this->paginatorDefaultLimit, $this->paginatorMaxLimit);
-        $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
+        return $this->makePaginated($rangeRequest, 'searchPaginated', true, false);
+    }
 
-        if ($request->has('q')) {
-            $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
-        } else {
-            $collection = $this->getAllEntities($limit, $offset);
-        }
-
-        $collection = $this->getWithNested($collection, $request);
-        $this->checkPermission(static::class.'@getAllPaginated', ['model' => $collection]);
-
-        return $this->getResponse()
-            ->transformer($this->getTransformer())
-            ->paginatedCollection($collection, $offset, $totalCount);
+    public function getAllPaginated(RangeRequest $rangeRequest)
+    {
+        return $this->makePaginated($rangeRequest, 'getAllPaginated');
     }
 
     /**
@@ -284,6 +275,41 @@ abstract class EntityController extends ApiController
         });
 
         return $this->getResponse()->noContent();
+    }
+
+    /**
+     * Helper for paginated controller actions with restrictions of allowed methods for getting content: listing and\or search.
+     *
+     * @return ApiResponse
+     */
+    protected function makePaginated(RangeRequest $rangeRequest, $permission, $allow_search = true, $allow_listing = true)
+    {
+        $request = $rangeRequest->getRequest();
+
+        $totalCount = $this->countEntities();
+        $limit = $rangeRequest->getLimit($this->paginatorDefaultLimit, $this->paginatorMaxLimit);
+        $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
+
+        if ($request->has('q')) {
+            if (!$allow_search) {
+                throw new BadRequestException('Search not allowed');
+            }
+
+            $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
+        } else {
+            if (!$allow_listing) {
+                throw new BadRequestException('Items listing not allowed');
+            }
+
+            $collection = $this->getAllEntities($limit, $offset);
+        }
+
+        $collection = $this->getWithNested($collection, $request);
+        $this->checkPermission(static::class . '@' . $permission, [ 'model' => $collection ]);
+
+        return $this->getResponse()
+            ->transformer($this->getTransformer())
+            ->paginatedCollection($collection, $offset, $totalCount);
     }
 
     /**
