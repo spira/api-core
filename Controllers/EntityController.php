@@ -14,6 +14,7 @@ use Elasticquent\ElasticquentResultCollection;
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Spira\Core\Contract\Exception\BadRequestException;
 use Spira\Core\Model\Collection\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spira\Core\Model\Model\BaseModel;
@@ -54,24 +55,14 @@ abstract class EntityController extends ApiController
             ->collection($collection);
     }
 
-    public function getAllPaginated(Request $request, RangeRequest $rangeRequest)
+    public function searchPaginated(RangeRequest $rangeRequest)
     {
-        $totalCount = $this->countEntities();
-        $limit = $rangeRequest->getLimit($this->paginatorDefaultLimit, $this->paginatorMaxLimit);
-        $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
+        return $this->makePaginated($rangeRequest, 'searchPaginated', true, false);
+    }
 
-        if ($request->has('q')) {
-            $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
-        } else {
-            $collection = $this->getAllEntities($limit, $offset);
-        }
-
-        $collection = $this->getWithNested($collection, $request);
-        $this->checkPermission(static::class.'@getAllPaginated', ['model' => $collection]);
-
-        return $this->getResponse()
-            ->transformer($this->getTransformer())
-            ->paginatedCollection($collection, $offset, $totalCount);
+    public function getAllPaginated(RangeRequest $rangeRequest)
+    {
+        return $this->makePaginated($rangeRequest, 'getAllPaginated');
     }
 
     /**
@@ -287,6 +278,41 @@ abstract class EntityController extends ApiController
     }
 
     /**
+     * Helper for paginated controller actions with restrictions of allowed methods for getting content: listing and\or search.
+     *
+     * @return ApiResponse
+     */
+    protected function makePaginated(RangeRequest $rangeRequest, $permission, $allow_search = true, $allow_listing = true)
+    {
+        $request = $rangeRequest->getRequest();
+
+        $totalCount = $this->countEntities();
+        $limit = $rangeRequest->getLimit($this->paginatorDefaultLimit, $this->paginatorMaxLimit);
+        $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
+
+        if ($request->has('q')) {
+            if (! $allow_search) {
+                throw new BadRequestException('Search not allowed');
+            }
+
+            $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
+        } else {
+            if (! $allow_listing) {
+                throw new BadRequestException('Items listing not allowed');
+            }
+
+            $collection = $this->getAllEntities($limit, $offset);
+        }
+
+        $collection = $this->getWithNested($collection, $request);
+        $this->checkPermission(static::class.'@'.$permission, ['model' => $collection]);
+
+        return $this->getResponse()
+            ->transformer($this->getTransformer())
+            ->paginatedCollection($collection, $offset, $totalCount);
+    }
+
+    /**
      * @param $id
      * @return BaseModel
      */
@@ -365,16 +391,8 @@ abstract class EntityController extends ApiController
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-
-        if (is_array($query)) { // Complex query
-            $searchResults = $this->complexSearch($query);
-        } else {
-            $searchResults = $model->searchByQuery([
-                'match_phrase_prefix' => [
-                    '_all' => $query,
-                ],
-            ], null, null, $limit, $offset);
-        }
+        $params = $this->convertQueryToElasticsearchRequest($query, $limit, $offset);
+        $searchResults = $model->complexSearch($params);
 
         if ($searchResults instanceof ElasticquentResultCollection) {
             $totalHits = $searchResults->totalHits();
@@ -393,24 +411,39 @@ abstract class EntityController extends ApiController
         return $searchResults;
     }
 
-    /**
-     * @param array $queryArray
-     * @return mixed
-     * @internal param $model
-     */
-    protected function complexSearch(array $queryArray)
+    protected function convertQueryToElasticsearchRequest($query, $limit = null, $offset = null)
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-        $searchResults = $model->complexSearch(
-            [
+
+        // Complex query
+        if (is_array($query)) {
+            $params = [
                 'index' => $model->getIndexName(),
                 'type' => $model->getTypeName(),
-                'body' => $this->translateQuery($queryArray),
-            ]
-        );
+                'body' => $this->translateQuery($query),
+            ];
 
-        return $searchResults;
+        // Simple query
+        } else {
+            $params = $model->getBasicEsParams(true, true, true, $limit, $offset);
+            $params['body']['query'] = [
+                'match_phrase_prefix' => [
+                    '_all' => $query,
+                ],
+            ];
+        }
+
+        return $this->customSearchConditions($params);
+    }
+
+    /**
+     * Method for adding custom search conditions by overriding in controllers.
+     * Should return array for elasticsearch request for complexSearch method.
+     */
+    protected function customSearchConditions($params)
+    {
+        return $params;
     }
 
     /**
