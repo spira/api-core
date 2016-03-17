@@ -94,7 +94,7 @@ class EntityTest extends TestCase
             'q' => base64_encode(json_encode($query)),
             'custom_search' => 1,
         ];
-        $this->getJson('/test/entities/search?' . http_build_query($params), [ 'Range' => 'entities=0-' ]);
+        $this->getJson('/test/entities/search?'.http_build_query($params), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
@@ -257,7 +257,7 @@ class EntityTest extends TestCase
 
         $this->app->instance(TestEntity::class, $mockModel);
 
-        $this->getJson($path . '?q='.base64_encode(json_encode('foobar')), ['Range' => 'entities=0-']);
+        $this->getJson($path.'?q='.base64_encode(json_encode('foobar')), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
@@ -296,7 +296,7 @@ class EntityTest extends TestCase
             ],
         ];
 
-        $this->getJson($path . '?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
+        $this->getJson($path.'?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(404);
     }
@@ -342,7 +342,7 @@ class EntityTest extends TestCase
             'authorId' => [''],
         ];
 
-        $this->getJson($path . '?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
+        $this->getJson($path.'?q='.base64_encode(json_encode($query)), ['Range' => 'entities=0-']);
 
         $this->assertResponseStatus(206);
     }

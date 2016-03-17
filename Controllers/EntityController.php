@@ -291,13 +291,13 @@ abstract class EntityController extends ApiController
         $offset = $rangeRequest->isGetLast() ? $totalCount - $limit : $rangeRequest->getOffset();
 
         if ($request->has('q')) {
-            if (!$allow_search) {
+            if (! $allow_search) {
                 throw new BadRequestException('Search not allowed');
             }
 
             $collection = $this->searchAllEntities($request->query('q'), $limit, $offset, $totalCount);
         } else {
-            if (!$allow_listing) {
+            if (! $allow_listing) {
                 throw new BadRequestException('Items listing not allowed');
             }
 
@@ -305,7 +305,7 @@ abstract class EntityController extends ApiController
         }
 
         $collection = $this->getWithNested($collection, $request);
-        $this->checkPermission(static::class . '@' . $permission, [ 'model' => $collection ]);
+        $this->checkPermission(static::class.'@'.$permission, ['model' => $collection]);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
