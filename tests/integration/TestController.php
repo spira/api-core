@@ -10,6 +10,7 @@
 
 namespace Spira\Core\tests\integration;
 
+use Illuminate\Http\Request;
 use Spira\Core\Controllers\EntityController;
 use Spira\Core\Controllers\LocalizableTrait;
 use Spira\Core\Model\Test\TestEntity;
@@ -36,6 +37,18 @@ class TestController extends EntityController
     public function cors()
     {
         return $this->getResponse()->item(['foo' => 'bar']);
+    }
+
+    protected function customSearchConditions($params)
+    {
+        /** @var Request $request */
+        $request = app(Request::class);
+
+        if ($request->has('custom_search')) {
+            $params['custom_search'] = 'some_value'; // Simulation of applying custom rules for elasticsearch
+        }
+
+        return $params;
     }
 
     /**

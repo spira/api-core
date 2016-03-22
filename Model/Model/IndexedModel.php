@@ -123,20 +123,23 @@ abstract class IndexedModel extends BaseModel
             foreach ($this->indexRelations as $nestedModelName) {
                 /** @var IndexedModel|IndexedCollection $results */
                 $results = $this->$nestedModelName()->getResults();
-                if ($results instanceof Collection) {
+
+                if (is_null($results)) {
+                    break;
+                } elseif ($results instanceof Collection) {
                     $nestedData = $results->map(function (IndexedModel $result) {
-                        return array_intersect_key($result->attributesToArray(), $result->mappingProperties);
+                        return array_intersect_key($result->attributesToArray(), $result->getMappingProperties());
                     });
 
                     $relations[snake_case($nestedModelName)] = $nestedData;
                 } else {
-                    $relations[snake_case($nestedModelName)] = array_intersect_key($results->attributesToArray(), $results->mappingProperties);
+                    $relations[snake_case($nestedModelName)] = array_intersect_key($results->attributesToArray(), $results->getMappingProperties());
                 }
             }
         }
 
         // Only include attributes present in mappingProperties
-        $attributes = array_intersect_key($this->attributesToArray(), $this->mappingProperties);
+        $attributes = array_intersect_key($this->attributesToArray(), $this->getMappingProperties());
 
         return array_merge($attributes, $relations);
     }
