@@ -389,12 +389,12 @@ abstract class EntityController extends ApiController
      */
     protected function searchAllEntities($query, $limit = null, $offset = null, &$totalCount = null)
     {
+        /* @var ElasticquentTrait $model */
+        $model = $this->getModel();
+
         if (isset($query['percolate']) && $query['percolate']) {
             $searchResults = $this->percolatedSearch($query);
         } else {
-            /* @var ElasticquentTrait $model */
-            $model = $this->getModel();
-
             $params = $this->convertQueryToElasticsearchRequest($query, $limit, $offset);
             $searchResults = $model->complexSearch($params);
         }
