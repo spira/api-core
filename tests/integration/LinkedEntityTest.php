@@ -13,6 +13,7 @@ namespace Spira\Core\tests\integration;
 use Spira\Core\tests\TestCase;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\Model\Test\SecondTestEntity;
+use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
 
 /**
  * Class LinkedEntityTest.
@@ -20,6 +21,8 @@ use Spira\Core\Model\Test\SecondTestEntity;
  */
 class LinkedEntityTest extends TestCase
 {
+    use ElasticSearchIndexerTrait;
+
     public function setUp()
     {
         parent::setUp();
@@ -51,6 +54,8 @@ class LinkedEntityTest extends TestCase
         $transformed = $factory->transformed();
         $transformed['value'] = 'ololo';
 
+        $this->expectElasticSearchReindexOne($entity, ['secondTestEntities']);
+
         $this->putJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id, $transformed);
 
         $this->assertResponseStatus(201);
@@ -66,6 +71,8 @@ class LinkedEntityTest extends TestCase
         /** @var $entity TestEntity */
         $entity = $this->getFactory(TestEntity::class)->create();
         $second = $this->getFactory(SecondTestEntity::class)->create();
+
+        $this->expectElasticSearchReindexOne($entity, ['secondTestEntities']);
 
         $this->putJson('test/many/'.$entity->getKey().'/children/'.$second->getKey());
 
@@ -86,6 +93,8 @@ class LinkedEntityTest extends TestCase
             $newEntities->pluck('entity_id')->toArray()
         );
 
+        $this->expectElasticSearchReindexOne($entity, ['secondTestEntities']);
+
         $this->postJson('test/many/'.$entity->entity_id.'/children', $factory->transformed());
 
         $this->assertResponseStatus(201);
@@ -102,6 +111,8 @@ class LinkedEntityTest extends TestCase
         $transformed[] = $this->getFactory(SecondTestEntity::class)
             ->setModel($entity->secondTestEntities()->first())
             ->transformed();
+
+        $this->expectElasticSearchReindexOne($entity, ['secondTestEntities']);
 
         $this->putJson('test/many/'.$entity->entity_id.'/children', $transformed);
 
@@ -120,6 +131,11 @@ class LinkedEntityTest extends TestCase
     {
         $entity = $this->makeEntity();
         $second = $entity->secondTestEntities()->first();
+
+        // @todo fix conflict
+        //$mock = $this->mockElasticSearchIndexer();
+        //$mock->shouldReceive('reindexOne')->once()->with($this->makeElasticSearchOneExpectation($entity), []);
+        //$mock->shouldReceive('reindexOne')->once()->with($this->makeElasticSearchOneExpectation($second), []);
 
         $this->deleteJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id);
 
@@ -141,6 +157,8 @@ class LinkedEntityTest extends TestCase
     public function testDetachMany()
     {
         $entity = $this->makeEntity();
+
+        $this->expectElasticSearchReindexOne($entity, []);
 
         $this->deleteJson('test/many/'.$entity->entity_id.'/children');
 

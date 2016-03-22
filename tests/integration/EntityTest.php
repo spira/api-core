@@ -12,11 +12,13 @@ namespace Spira\Core\tests\integration;
 
 use Carbon\Carbon;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Mockery;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\Localization;
 use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
+use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
 use Spira\Core\tests\Extensions\WithAuthorizationMockTrait;
 use Spira\Core\tests\TestCase;
 use Elasticquent\ElasticquentResultCollection;
@@ -27,7 +29,7 @@ use Elasticquent\ElasticquentResultCollection;
  */
 class EntityTest extends TestCase
 {
-    use WithAuthorizationMockTrait;
+    use WithAuthorizationMockTrait, ElasticSearchIndexerTrait;
 
     public function setUp()
     {
@@ -548,6 +550,8 @@ class EntityTest extends TestCase
         $entity = $this->getFactory(TestEntity::class)->makeVisible(['hidden'])->transformed();
         $rowCount = TestEntity::count();
 
+        $this->mockElasticSearchIndexer()->shouldNotReceive('reindexOne');
+
         $this->withAuthorization()->putJson('/test/entities/'.$entity['entityId'], $entity);
 
         $object = json_decode($this->response->getContent());
@@ -641,6 +645,8 @@ class EntityTest extends TestCase
 
         $rowCount = TestEntity::count();
 
+        $this->expectElasticSearchReindexMany(5);
+
         $this->withAuthorization()->putJson('/test/entities', $entities);
 
         $object = json_decode($this->response->getContent());
@@ -661,6 +667,8 @@ class EntityTest extends TestCase
         $entities[0]['entityId'] = (string) Uuid::uuid4();
         $entities[1]['entityId'] = (string) Uuid::uuid4();
         $rowCount = TestEntity::count();
+
+        $this->expectElasticSearchReindexMany(5);
 
         $this->withAuthorization()->putJson('/test/entities', $entities);
 
@@ -686,6 +694,8 @@ class EntityTest extends TestCase
 
         $object = json_decode($this->response->getContent());
 
+        $this->assertResponseStatus(422);
+
         $this->assertCount(5, $object->invalid);
         $this->assertObjectHasAttribute('entityId', $object->invalid[0]);
         $this->assertEquals('The entity id must be an UUID string.', $object->invalid[0]->entityId[0]->message);
@@ -704,6 +714,7 @@ class EntityTest extends TestCase
         $this->withAuthorization()->putJson('/test/entities', $entities);
 
         $object = json_decode($this->response->getContent());
+        $this->assertResponseStatus(422);
 
         $this->assertCount(5, $object->invalid);
         $this->assertObjectHasAttribute('multiWordColumnTitle', $object->invalid[0]);
@@ -715,6 +726,8 @@ class EntityTest extends TestCase
     public function testPatchOne()
     {
         $entity = factory(TestEntity::class)->create();
+
+        $this->expectElasticSearchReindexOne($entity);
 
         $this->withAuthorization()->patchJson('/test/entities/'.$entity->entity_id, ['varchar' => 'foobar']);
 
@@ -728,6 +741,8 @@ class EntityTest extends TestCase
     public function testPatchOneInvalidId()
     {
         $this->withAuthorization()->patchJson('/test/entities/'.(string) Uuid::uuid4(), ['varchar' => 'foobar']);
+
+        $this->assertResponseStatus(422);
         $object = json_decode($this->response->getContent());
         $this->assertObjectHasAttribute('entityId', $object->invalid);
         $this->assertEquals('The selected entity id is invalid.', $object->invalid->entityId[0]->message);
@@ -736,6 +751,8 @@ class EntityTest extends TestCase
     public function testPatchMany()
     {
         $entities = factory(TestEntity::class, 5)->create();
+
+        $this->expectElasticSearchReindexMany(5);
 
         $data = array_map(function ($entity) {
             return [
@@ -794,6 +811,8 @@ class EntityTest extends TestCase
         $entity = factory(TestEntity::class)->create();
         $rowCount = TestEntity::count();
 
+        $this->expectElasticSearchDeleteOne($entity, true);
+
         $this->withAuthorization()->deleteJson('/test/entities/'.$entity->entity_id);
 
         $this->assertResponseStatus(204);
@@ -820,6 +839,8 @@ class EntityTest extends TestCase
         $entities = factory(TestEntity::class, 5)->create()->all();
         $rowCount = TestEntity::count();
 
+        $this->expectElasticSearchDeleteMany(5, true);
+
         $this->withAuthorization()->deleteJson('/test/entities', $entities);
 
         $this->assertResponseStatus(204);
@@ -836,6 +857,7 @@ class EntityTest extends TestCase
 
         $this->withAuthorization()->deleteJson('/test/entities', $entities->all());
 
+        $this->assertResponseStatus(422);
         $object = json_decode($this->response->getContent());
 
         $this->assertTrue(is_array($object->invalid));
