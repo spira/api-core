@@ -365,8 +365,7 @@ abstract class EntityController extends ApiController
     {
         if (isset($query['percolate']) && $query['percolate']) {
             $searchResults = $this->percolatedSearch($query);
-        }
-        else {
+        } else {
             /* @var ElasticquentTrait $model */
             $model = $this->getModel();
 
@@ -395,10 +394,9 @@ abstract class EntityController extends ApiController
      * @param $query
      * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
-    protected function percolatedSearch($query) {
-
+    protected function percolatedSearch($query)
+    {
         throw new BadRequestException('Percolated Search not available for this entity');
-
     }
 
     /**
