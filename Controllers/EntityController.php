@@ -391,8 +391,13 @@ abstract class EntityController extends ApiController
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-        $params = $this->convertQueryToElasticsearchRequest($query, $limit, $offset);
-        $searchResults = $model->complexSearch($params);
+
+        if (isset($query['percolate']) && $query['percolate']) {
+            $searchResults = $this->percolatedSearch($query);
+        } else {
+            $params = $this->convertQueryToElasticsearchRequest($query, $limit, $offset);
+            $searchResults = $model->complexSearch($params);
+        }
 
         if ($searchResults instanceof ElasticquentResultCollection) {
             $totalHits = $searchResults->totalHits();
@@ -409,6 +414,15 @@ abstract class EntityController extends ApiController
         }
 
         return $searchResults;
+    }
+
+    /**
+     * @param $query
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    protected function percolatedSearch($query)
+    {
+        throw new BadRequestException('Percolated Search not available for this entity');
     }
 
     protected function convertQueryToElasticsearchRequest($query, $limit = null, $offset = null)
