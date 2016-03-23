@@ -10,14 +10,14 @@ class ElasticSearchIndexer
 {
     protected $relations;
 
-    function __construct(array $relations = [])
+    public function __construct(array $relations = [])
     {
         $this->relations = $relations;
     }
 
     public function reindexOne($model, array $relations = null)
     {
-        if (!($model instanceof IndexedModel)) {
+        if (! ($model instanceof IndexedModel)) {
             return false;
         }
 
@@ -45,7 +45,7 @@ class ElasticSearchIndexer
 
         $model->delete();
 
-        if (!$reindexItems->isEmpty()) {
+        if (! $reindexItems->isEmpty()) {
             $this->reindexMany($reindexItems, []);
         }
     }
@@ -61,7 +61,7 @@ class ElasticSearchIndexer
     }
 
     /**
-     * Returns items from all relations for reindexing if model is IndexedModel
+     * Returns items from all relations for reindexing if model is IndexedModel.
      *
      * @return Collection
      * @throws \Exception
@@ -81,9 +81,8 @@ class ElasticSearchIndexer
         return $reindexItems;
     }
 
-
     /**
-     * Merges items to collection and preserves uniqueness by Model::getKey()
+     * Merges items to collection and preserves uniqueness by Model::getKey().
      *
      * @return Collection
      */
@@ -107,13 +106,13 @@ class ElasticSearchIndexer
      */
     protected function getRelationItems(IndexedModel $model, $relation)
     {
-        if (!method_exists($model, $relation)) {
+        if (! method_exists($model, $relation)) {
             throw new \Exception(sprintf('Tried to reindex unexistant relation "%s" on model "%s"', $relation, $model->getMorphClass()));
         }
 
         /** @var Relation $rel */
         $rel = call_user_func([$model, $relation]);
-        if (!$result = $rel->getResults()) {
+        if (! $result = $rel->getResults()) {
             return [];
         }
 
@@ -124,7 +123,7 @@ class ElasticSearchIndexer
     {
         $reindexRelations = $this->getRelationsForReindex($model);
 
-        if (!is_null($relations)) {
+        if (! is_null($relations)) {
             $reindexRelations = array_intersect($reindexRelations, $relations);
         }
 

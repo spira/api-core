@@ -9,7 +9,7 @@ use Spira\Core\Model\Model\ElasticSearchIndexer;
 trait ElasticSearchIndexerTrait
 {
     /**
-     * Make a mock of ElasticSearchIndexer and add to container
+     * Make a mock of ElasticSearchIndexer and add to container.
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
@@ -23,14 +23,14 @@ trait ElasticSearchIndexerTrait
     }
 
     /**
-     * Make a mock of ElasticSearchIndexer and add expectation of reindexMany call with folowing $args arguments
+     * Make a mock of ElasticSearchIndexer and add expectation of reindexMany call with folowing $args arguments.
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
     protected function expectElasticSearchReindexMany($number, $relations = null, ElasticSearchIndexer $mock = null)
     {
         $args = [$this->makeElasticSearchManyExpectation($number)];
-        if (!is_null($relations)) {
+        if (! is_null($relations)) {
             array_push($args, $relations);
         }
 
@@ -42,7 +42,7 @@ trait ElasticSearchIndexerTrait
 
     /**
      * Make a mock of ElasticSearchIndexer and add expectation of deleteManyAndReindexRelated call
-     * If $passthru is true then real delete call will occur
+     * If $passthru is true then real delete call will occur.
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
@@ -59,14 +59,14 @@ trait ElasticSearchIndexerTrait
     }
 
     /**
-     * Make a mock of ElasticSearchIndexer and add expectation of reindexOne call with folowing $args arguments
+     * Make a mock of ElasticSearchIndexer and add expectation of reindexOne call with folowing $args arguments.
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
     protected function expectElasticSearchReindexOne(Model $model, $relations = null, ElasticSearchIndexer $mock = null)
     {
         $args = [$this->makeElasticSearchOneExpectation($model)];
-        if (!is_null($relations)) {
+        if (! is_null($relations)) {
             array_push($args, $relations);
         }
 
@@ -78,7 +78,7 @@ trait ElasticSearchIndexerTrait
 
     /**
      * Make a mock of ElasticSearchIndexer and add expectation of deleteOneAndReindexRelated
-     * If $passthru is true then real delete call will occur
+     * If $passthru is true then real delete call will occur.
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
@@ -97,7 +97,7 @@ trait ElasticSearchIndexerTrait
     }
 
     /**
-     * Makes a Mockery expectation for one item
+     * Makes a Mockery expectation for one item.
      *
      * @return \Mockery\Matcher\Closure
      */
@@ -111,7 +111,7 @@ trait ElasticSearchIndexerTrait
     }
 
     /**
-     * Makes a Mockery expectation for many items
+     * Makes a Mockery expectation for many items.
      *
      * @return \Mockery\Matcher\Closure
      */

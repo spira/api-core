@@ -10,7 +10,7 @@ use Spira\Core\Model\Model\ElasticSearchIndexer;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * Class ElasticSearchIndexerTest
+ * Class ElasticSearchIndexerTest.
  * @group elasticsearch
  */
 class ElasticSearchIndexerTest extends TestCase

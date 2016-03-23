@@ -12,7 +12,6 @@ namespace Spira\Core\tests\integration;
 
 use Carbon\Carbon;
 use Illuminate\Http\Response;
-use Illuminate\Support\Collection;
 use Mockery;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\Localization;
