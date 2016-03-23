@@ -2,8 +2,8 @@
 
 namespace Spira\Core\tests\Extensions;
 
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Spira\Core\Model\Collection\Collection;
 use Spira\Core\Model\Model\ElasticSearchIndexer;
 
 trait ElasticSearchIndexerTrait
@@ -27,11 +27,14 @@ trait ElasticSearchIndexerTrait
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
-    protected function expectElasticSearchReindexMany($number, ...$args)
+    protected function expectElasticSearchReindexMany($number, $relations = null, ElasticSearchIndexer $mock = null)
     {
-        array_unshift($args, $this->makeElasticSearchManyExpectation($number));
+        $args = [$this->makeElasticSearchManyExpectation($number)];
+        if (!is_null($relations)) {
+            array_push($args, $relations);
+        }
 
-        $mock = $this->mockElasticSearchIndexer();
+        $mock = $mock ?: $this->mockElasticSearchIndexer();
         $mock->shouldReceive('reindexMany')->once()->withArgs($args);
 
         return $mock;
@@ -43,9 +46,9 @@ trait ElasticSearchIndexerTrait
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
-    protected function expectElasticSearchDeleteMany($number, $passthru = false)
+    protected function expectElasticSearchDeleteMany($number, $passthru = false, ElasticSearchIndexer $mock = null)
     {
-        $mock = $this->mockElasticSearchIndexer();
+        $mock = $mock ?: $this->mockElasticSearchIndexer();
 
         $call = $mock->shouldReceive('deleteManyAndReindexRelated')->once()->with($this->makeElasticSearchManyExpectation($number));
         if ($passthru) {
@@ -60,11 +63,14 @@ trait ElasticSearchIndexerTrait
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
-    protected function expectElasticSearchReindexOne(Model $model, ...$args)
+    protected function expectElasticSearchReindexOne(Model $model, $relations = null, ElasticSearchIndexer $mock = null)
     {
-        array_unshift($args, $this->makeElasticSearchOneExpectation($model));
+        $args = [$this->makeElasticSearchOneExpectation($model)];
+        if (!is_null($relations)) {
+            array_push($args, $relations);
+        }
 
-        $mock = $this->mockElasticSearchIndexer();
+        $mock = $mock ?: $this->mockElasticSearchIndexer();
         $mock->shouldReceive('reindexOne')->once()->withArgs($args);
 
         return $mock;
@@ -76,11 +82,11 @@ trait ElasticSearchIndexerTrait
      *
      * @return \Mockery\Mock|ElasticSearchIndexer
      */
-    protected function expectElasticSearchDeleteOne(Model $model, $passthru = false)
+    protected function expectElasticSearchDeleteOne(Model $model, $passthru = false, ElasticSearchIndexer $mock = null)
     {
         $exp = $this->makeElasticSearchOneExpectation($model);
 
-        $mock = $this->mockElasticSearchIndexer();
+        $mock = $mock ?: $this->mockElasticSearchIndexer();
 
         $call = $mock->shouldReceive('deleteOneAndReindexRelated')->once()->with($exp);
         if ($passthru) {

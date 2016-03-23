@@ -3,6 +3,7 @@
 namespace Spira\Core\Model\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 class ElasticSearchIndexer
@@ -20,12 +21,7 @@ class ElasticSearchIndexer
             return false;
         }
 
-        $reindexRelations = $this->getRelationsForReindex($model);
-
-        if (!is_null($relations)) {
-            $reindexRelations = array_intersect($reindexRelations, $relations);
-        }
-
+        $reindexRelations = $this->filterRelations($model, $relations);
         foreach ($reindexRelations as $relation) {
             $this->reindexMany($this->getRelationItems($model, $relation), []);
         }
@@ -45,14 +41,7 @@ class ElasticSearchIndexer
 
     public function deleteOneAndReindexRelated(Model $model)
     {
-        $reindexItems = new Collection();
-        if ($model instanceof IndexedModel) {
-            $relations = $this->getRelationsForReindex($model);
-
-            foreach ($relations as $relation) {
-                $reindexItems = $reindexItems->merge($this->getRelationItems($model, $relation));
-            }
-        }
+        $reindexItems = $this->getAllItemsFromRelations($model);
 
         $model->delete();
 
@@ -71,6 +60,41 @@ class ElasticSearchIndexer
         }
     }
 
+    /**
+     * Returns items from all relations for reindexing if model is IndexedModel
+     *
+     * @return Collection
+     * @throws \Exception
+     */
+    public function getAllItemsFromRelations(Model $model, array $relations = null)
+    {
+        $reindexItems = new Collection();
+
+        if ($model instanceof IndexedModel) {
+            $fetchRelations = $this->filterRelations($model, $relations);
+
+            foreach ($fetchRelations as $relation) {
+                $reindexItems = $reindexItems->merge($this->getRelationItems($model, $relation));
+            }
+        }
+
+        return $reindexItems;
+    }
+
+
+    /**
+     * Merges items to collection and preserves uniqueness by Model::getKey()
+     *
+     * @return Collection
+     */
+    public function mergeUniqueCollection(Collection $collection, $items)
+    {
+        return $collection->merge($items)
+            ->unique(function (Model $model) {
+                return $model->getKey();
+            });
+    }
+
     protected function getRelationsForReindex(IndexedModel $model)
     {
         $class = $model->getMorphClass();
@@ -83,11 +107,27 @@ class ElasticSearchIndexer
      */
     protected function getRelationItems(IndexedModel $model, $relation)
     {
-        // @todo - getRelation() does not work as expected - need to refactor
-        if (!$result = $model->getRelation($relation)->getResults()) {
+        if (!method_exists($model, $relation)) {
+            throw new \Exception(sprintf('Tried to reindex unexistant relation "%s" on model "%s"', $relation, $model->getMorphClass()));
+        }
+
+        /** @var Relation $rel */
+        $rel = call_user_func([$model, $relation]);
+        if (!$result = $rel->getResults()) {
             return [];
         }
 
         return is_array($result) || $result instanceof \Traversable ? $result : [$result];
+    }
+
+    protected function filterRelations(Model $model, array $relations = null)
+    {
+        $reindexRelations = $this->getRelationsForReindex($model);
+
+        if (!is_null($relations)) {
+            $reindexRelations = array_intersect($reindexRelations, $relations);
+        }
+
+        return $reindexRelations;
     }
 }

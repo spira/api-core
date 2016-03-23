@@ -2,11 +2,10 @@
 
 namespace Spira\Core\tests;
 
-use Illuminate\Database\Eloquent\Model;
 use Mockery\Mock;
 use Spira\Core\Model\Test\TestEntity;
+use Illuminate\Database\Eloquent\Model;
 use Spira\Core\Model\Model\IndexedModel;
-use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Model\ElasticSearchIndexer;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -16,6 +15,18 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class ElasticSearchIndexerTest extends TestCase
 {
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Tried to reindex unexistant relation "badRelation" on model "Spira\Core\Model\Model\IndexedModel"
+     */
+    public function testUnexistantRelationError()
+    {
+        $esi = $this->makeIndexer();
+        $entity = $this->makeEntityMock(IndexedModel::class);
+
+        $esi->reindexOne($entity);
+    }
+
     public function testReindexOneWithAllRelations()
     {
         $esi = $this->makeIndexer();
@@ -31,8 +42,8 @@ class ElasticSearchIndexerTest extends TestCase
         $entity = $this->makeEntityMock();
 
         $entity->shouldReceive('updateIndex')->once()->andReturn([]);
-        $entity->shouldReceive('getRelation')->once()->with('secondTestEntities')->andReturn($relation);
-        $entity->shouldReceive('getRelation')->once()->with('testMany')->andReturn($relation);
+        $entity->shouldReceive('secondTestEntities')->once()->andReturn($relation);
+        $entity->shouldReceive('testMany')->once()->andReturn($relation);
 
         $this->assertIsArray($esi->reindexOne($entity)); // Assert method returns result of $entity->updateIndex()
     }
@@ -46,7 +57,7 @@ class ElasticSearchIndexerTest extends TestCase
         $relation->shouldReceive('getResults')->once()->andReturn([]);
 
         $entity->shouldReceive('updateIndex')->once();
-        $entity->shouldReceive('getRelation')->once()->with('secondTestEntities')->andReturn($relation);
+        $entity->shouldReceive('secondTestEntities')->once()->andReturn($relation);
 
         $esi->reindexOne($entity, ['secondTestEntities', 'nonexistantRelation']);
     }
@@ -113,8 +124,8 @@ class ElasticSearchIndexerTest extends TestCase
 
         $entity = $this->makeEntityMock();
         $entity->shouldReceive('delete')->once();
-        $entity->shouldReceive('getRelation')->with('secondTestEntities')->once()->andReturn($relation);
-        $entity->shouldReceive('getRelation')->with('testMany')->once()->andReturn($relation);
+        $entity->shouldReceive('secondTestEntities')->once()->andReturn($relation);
+        $entity->shouldReceive('testMany')->once()->andReturn($relation);
 
         $esi->deleteOneAndReindexRelated($entity);
     }
@@ -144,7 +155,7 @@ class ElasticSearchIndexerTest extends TestCase
     {
         return new ElasticSearchIndexer([
             TestEntity::class => ['secondTestEntities', 'testMany'],
-            SecondTestEntity::class => ['testEntities'],
+            IndexedModel::class => ['badRelation'],
         ]);
     }
 

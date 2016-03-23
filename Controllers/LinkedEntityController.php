@@ -48,7 +48,8 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->attach($childModel, $this->getPivotValues($childModel));
 
-        $searchIndexer->reindexOne($parent, [$this->relationName]);
+        $searchIndexer->reindexOne($parent, []);
+        $searchIndexer->reindexOne($childModel, []);
 
         return $this->getResponse()->created();
     }
@@ -82,10 +83,16 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $parent = $this->findParentEntity($id);
 
         $this->checkPermission(static::class.'@detachAll', ['model' => $parent]);
+
+        $reindexItems = $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]);
+
         $this->getRelation($parent)->detach();
 
-        // @todo reindex all detached items
+        // Reindex parent entity
         $searchIndexer->reindexOne($parent, []);
+
+        // Reindex all detached entities
+        $searchIndexer->reindexMany($reindexItems, []);
 
         return $this->getResponse()->noContent();
     }
@@ -104,15 +111,22 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $this->preSync($parent, $childModels);
 
         $this->saveNewItemsInCollection($childModels);
-        $this->getRelation($parent)->{$method}($this->makeSyncList($childModels, $requestCollection));
 
         /** @var ElasticSearchIndexer $searchIndexer */
         $searchIndexer = app(ElasticSearchIndexer::class);
-        $searchIndexer->reindexOne($parent, [$this->relationName]);
+        $reindexItems = $searchIndexer->mergeUniqueCollection(
+            $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]),
+            $childModels
+        );
 
-        // @todo reindex all detached items
-
+        $this->getRelation($parent)->{$method}($this->makeSyncList($childModels, $requestCollection));
         $this->postSync($parent, $childModels);
+
+        // Reindex parent entity without relations
+        $searchIndexer->reindexOne($parent, []);
+
+        // Reindex all affected items without relations
+        $searchIndexer->reindexMany($reindexItems, []);
 
         $transformed = $this->getTransformer()->transformCollection($this->findAllChildren($parent), ['_self']);
 
