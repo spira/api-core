@@ -20,6 +20,7 @@ use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\Responder\Transformers\EloquentModelTransformer;
 use Spira\Core\Responder\TransformerService;
+use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
 use Spira\Core\tests\Extensions\WithAuthorizationMockTrait;
 use Spira\Core\tests\TestCase;
 
@@ -29,7 +30,7 @@ use Spira\Core\tests\TestCase;
  */
 class ChildEntityTest extends TestCase
 {
-    use  WithAuthorizationMockTrait;
+    use  WithAuthorizationMockTrait, ElasticSearchIndexerTrait;
 
     public function setUp()
     {
@@ -172,6 +173,8 @@ class ChildEntityTest extends TestCase
         $this->addRelatedEntities($entity);
         $childEntity = factory(SecondTestEntity::class)->make();
 
+        $this->expectElasticSearchReindexOne($entity, []);
+
         $this->withAuthorization()->postJson('/test/entities/'.$entity->entity_id.'/child', $this->prepareEntity($childEntity));
 
         $this->shouldReturnJson();
@@ -201,11 +204,15 @@ class ChildEntityTest extends TestCase
         $entity = factory(TestEntity::class)->create();
         $this->addRelatedEntities($entity);
         $childEntity = factory(SecondTestEntity::class)->make();
-        $childEntity = $this->prepareEntity($childEntity);
+        $childEntityTransformed = $this->prepareEntity($childEntity);
 
         $rowCount = TestEntity::find($entity->entity_id)->testMany->count();
 
-        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/child/'.$childEntity['entityId'], $childEntity);
+        $mock = $this->expectElasticSearchReindexOne($entity, []);
+        $this->expectElasticSearchReindexOne($childEntity, null, $mock);
+
+        $this->withAuthorization()
+            ->putJson('/test/entities/'.$entity->entity_id.'/child/'.$childEntityTransformed['entityId'], $childEntityTransformed);
 
         $object = json_decode($this->response->getContent());
 
@@ -218,12 +225,16 @@ class ChildEntityTest extends TestCase
     {
         $entity = factory(TestEntity::class)->create();
 
-        $entity2 = $this->getFactory(SecondTestEntity::class)->customize([
+        $childEntity = $this->getFactory(SecondTestEntity::class)->make([
             'entity_id' => $entity->entity_id,
             'value' => 'random_value_impossible_to_be_generated_as_id',
-        ])->transformed();
+        ]);
+        $childEntityTransformed = $this->prepareEntity($childEntity);
 
-        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/child', $entity2);
+        $mock = $this->expectElasticSearchReindexOne($entity, []);
+        $this->expectElasticSearchReindexOne($childEntity, null, $mock);
+
+        $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/child', $childEntityTransformed);
 
         $object = json_decode($this->response->getContent());
 
@@ -313,6 +324,9 @@ class ChildEntityTest extends TestCase
 
         $childCount = TestEntity::find($entity->entity_id)->testMany->count();
 
+        $mock = $this->expectElasticSearchReindexMany(5);
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
+
         $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/children', $childEntities);
 
         $object = json_decode($this->response->getContent());
@@ -334,6 +348,9 @@ class ChildEntityTest extends TestCase
         }, $childEntities->all());
 
         $childCount = TestEntity::find($entity->entity_id)->secondTestEntities->count();
+
+        $mock = $this->expectElasticSearchReindexMany(5);
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
 
         $this->withAuthorization()->putJson('/test/entities/'.$entity->entity_id.'/childrenbelongs', $childEntities);
 
@@ -397,6 +414,9 @@ class ChildEntityTest extends TestCase
         $this->addRelatedEntities($entity);
         $childEntity = $entity->testMany->first();
 
+        $mock = $this->expectElasticSearchReindexOne($entity, []);
+        $this->expectElasticSearchReindexOne($childEntity, null, $mock);
+
         $this->withAuthorization()->patchJson('/test/entities/'.$entity->entity_id.'/child/'.$childEntity->entity_id, ['value' => 'foobar']);
 
         $entity = TestEntity::find($entity->entity_id);
@@ -454,6 +474,9 @@ class ChildEntityTest extends TestCase
                 'value'   => 'foobar',
             ];
         }, $childEntities->all());
+
+        $mock = $this->expectElasticSearchReindexOne($entity, []);
+        $this->expectElasticSearchReindexMany($childEntities->count(), null, $mock);
 
         $this->withAuthorization()->patchJson('/test/entities/'.$entity->entity_id.'/children', $data);
 
@@ -513,6 +536,8 @@ class ChildEntityTest extends TestCase
         $childEntity = $entity->testMany->first();
         $childCount = TestEntity::find($entity->entity_id)->testMany->count();
 
+        $this->expectElasticSearchDeleteOne($childEntity, true);
+
         $this->withAuthorization()->deleteJson('/test/entities/'.$entity->entity_id.'/child/'.$childEntity->entity_id);
 
         $this->assertResponseStatus(204);
@@ -529,6 +554,8 @@ class ChildEntityTest extends TestCase
         ])->make();
 
         $entity->testMany()->save($entity2);
+
+        $this->expectElasticSearchDeleteOne($entity2, true);
 
         $this->withAuthorization()->deleteJson('/test/entities/'.$entity->entity_id.'/child');
 
@@ -570,6 +597,8 @@ class ChildEntityTest extends TestCase
                 'value'   => 'foobar',
             ];
         }, $childEntities->all());
+
+        $this->expectElasticSearchDeleteMany($childCount, true);
 
         $this->withAuthorization()->deleteJson('/test/entities/'.$entity->entity_id.'/children', $data);
 

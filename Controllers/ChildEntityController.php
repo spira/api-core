@@ -10,11 +10,11 @@
 
 namespace Spira\Core\Controllers;
 
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
-use Spira\Core\Model\Collection\Collection;
 use Spira\Core\Model\Model\BaseModel;
 use Spira\Core\Responder\Response\ApiResponse;
+use Spira\Core\Model\Model\ElasticSearchIndexer;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class ChildEntityController extends AbstractRelatedEntityController
 {
@@ -73,7 +73,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @throws \Exception
      * @throws \Exception|null
      */
-    public function postOne(Request $request, $id)
+    public function postOne(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $parent = $this->findParentEntity($id);
         $childModel = $this->getChildModel()->newInstance();
@@ -86,6 +86,9 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
         $this->checkPermission(static::class.'@postOne', ['model' => $parent, 'children' => $childModel]);
 
         $this->getRelation($parent)->save($childModel);
+
+        // Children is auto updated, so need only to update parent
+        $searchIndexer->reindexOne($parent, []);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -101,7 +104,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param  Request $request
      * @return ApiResponse
      */
-    public function postMany(Request $request, $id)
+    public function postMany(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $parent = $this->findParentEntity($id);
 
@@ -116,8 +119,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->saveMany($childModels);
 
-        // @Todo: Ran into an issue where updating a child entity through "putMany" request ("hasMany"/"belongsTo" relationship) does not fire the parent's "updated" event (which means that the parent object isn't reindexed in elastic search so it will not contain the new information). "putMany" does appear to update the parent's updated timestamp which does suggest that it is touched in some way (confirmed that Laravel is issuing the command to update the time stamp of the parent). Manually touching the parent fixes this problem.
-        $parent->touch();
+        // Children is auto updated, so need only to update parent
+        $searchIndexer->reindexOne($parent, []);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -133,7 +136,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param bool|string $childId
      * @return ApiResponse
      */
-    public function putOne(Request $request, $id, $childId = false)
+    public function putOne(Request $request, ElasticSearchIndexer $searchIndexer, $id, $childId = false)
     {
         $parent = $this->findParentEntity($id);
 
@@ -156,6 +159,12 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->save($childModel);
 
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
+
+        // Need to reindex childModel and all relations
+        $searchIndexer->reindexOne($childModel);
+
         return $this->getResponse()
             ->transformer($this->getTransformer())
             ->created()
@@ -170,7 +179,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param string $id
      * @return ApiResponse
      */
-    public function putMany(Request $request, $id)
+    public function putMany(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $parent = $this->findParentEntity($id);
 
@@ -183,6 +192,12 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@putMany', ['model' => $parent, 'children' => $childModels]);
 
+        // Collect all affected items
+        $reindexItems = $searchIndexer->mergeUniqueCollection(
+            $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]),
+            $childModels
+        );
+
         $relation = $this->getRelation($parent);
 
         if ($relation instanceof BelongsToMany) {
@@ -192,7 +207,11 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
             $relation->saveMany($childModels);
         }
 
-        $parent->touch(); // See to-do comment in postMany function above.
+        // We need to reindex all affected items with relations
+        $searchIndexer->reindexMany($reindexItems);
+
+        // Reindex parent without relations
+        $searchIndexer->reindexOne($parent, []);
 
         $this->postSync($parent, $childModels);
 
@@ -210,7 +229,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param bool|string $childId
      * @return ApiResponse
      */
-    public function patchOne(Request $request, $id, $childId = false)
+    public function patchOne(Request $request, ElasticSearchIndexer $searchIndexer, $id, $childId = false)
     {
         $parent = $this->findParentEntity($id);
 
@@ -232,6 +251,12 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->save($childModel);
 
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
+
+        // Need to reindex childModel and all relations
+        $searchIndexer->reindexOne($childModel);
+
         return $this->getResponse()->noContent();
     }
 
@@ -242,7 +267,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param  Request $request
      * @return ApiResponse
      */
-    public function patchMany(Request $request, $id)
+    public function patchMany(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $requestCollection = $request->json()->all();
 
@@ -257,6 +282,12 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->saveMany($childModels);
 
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
+
+        // We need to reindex all items with relations
+        $searchIndexer->reindexMany($childModels);
+
         return $this->getResponse()->noContent();
     }
 
@@ -268,7 +299,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @return ApiResponse
      * @throws \Exception
      */
-    public function deleteOne($id, $childId = false)
+    public function deleteOne($id, ElasticSearchIndexer $searchIndexer, $childId = false)
     {
         $parent = $this->findParentEntity($id);
 
@@ -281,7 +312,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@deleteOne', ['model' => $parent, 'children' => $childModel]);
 
-        $childModel->delete();
+        $searchIndexer->deleteOneAndReindexRelated($childModel);
+
         $parent->fireRevisionableEvent('deleteChild', [$childModel, $this->relationName]);
 
         return $this->getResponse()->noContent();
@@ -294,7 +326,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function deleteMany(Request $request, $id)
+    public function deleteMany(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $requestCollection = $request->json()->all();
         $model = $this->findParentEntity($id);
@@ -303,9 +335,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@deleteMany', ['model' => $model, 'children' => $childModels]);
 
-        $childModels->each(function (BaseModel $model) {
-            $model->delete();
-        });
+        $searchIndexer->deleteManyAndReindexRelated($childModels);
 
         return $this->getResponse()->noContent();
     }

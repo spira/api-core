@@ -18,6 +18,7 @@ use Spira\Core\Contract\Exception\BadRequestException;
 use Spira\Core\Model\Collection\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spira\Core\Model\Model\BaseModel;
+use Spira\Core\Model\Model\ElasticSearchIndexer;
 use Spira\Core\Responder\Contract\TransformerInterface;
 use Spira\Core\Responder\Paginator\RangeRequest;
 use Spira\Core\Responder\Response\ApiResponse;
@@ -146,10 +147,11 @@ abstract class EntityController extends ApiController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function putOne(Request $request, $id)
+    public function putOne(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $this->checkEntityIdMatchesRoute($request, $id, $this->getModel());
         $model = $this->findOrNewEntity($id);
+        $exists = $model->exists;
 
         $requestEntity = $request->json()->all();
         $this->validateRequest($requestEntity, $this->getValidationRules($id, $requestEntity));
@@ -157,6 +159,8 @@ abstract class EntityController extends ApiController
         $this->fillModel($model, $request->json()->all());
         $this->checkPermission(static::class.'@putOne', ['model' => $model]);
         $model->save();
+
+        $exists && $searchIndexer->reindexOne($model);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -170,7 +174,7 @@ abstract class EntityController extends ApiController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function putMany(Request $request)
+    public function putMany(Request $request, ElasticSearchIndexer $searchIndexer)
     {
         $requestCollection = $request->json()->all();
 
@@ -185,6 +189,8 @@ abstract class EntityController extends ApiController
             return $model->save();
         });
 
+        $searchIndexer->reindexMany($modelCollection);
+
         return $this->getResponse()
             ->transformer($this->getTransformer())
             ->created()
@@ -198,7 +204,7 @@ abstract class EntityController extends ApiController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function patchOne(Request $request, $id)
+    public function patchOne(Request $request, ElasticSearchIndexer $searchIndexer, $id)
     {
         $this->checkEntityIdMatchesRoute($request, $id, $this->getModel(), false);
 
@@ -211,6 +217,8 @@ abstract class EntityController extends ApiController
         $this->checkPermission(static::class.'@patchOne', ['model' => $model]);
         $model->save();
 
+        $searchIndexer->reindexOne($model);
+
         return $this->getResponse()->noContent();
     }
 
@@ -220,7 +228,7 @@ abstract class EntityController extends ApiController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function patchMany(Request $request)
+    public function patchMany(Request $request, ElasticSearchIndexer $searchIndexer)
     {
         $requestCollection = $request->json()->all();
 
@@ -236,6 +244,8 @@ abstract class EntityController extends ApiController
             return $model->save();
         });
 
+        $searchIndexer->reindexMany($modelsCollection);
+
         return $this->getResponse()->noContent();
     }
 
@@ -245,13 +255,13 @@ abstract class EntityController extends ApiController
      * @param  string   $id
      * @return ApiResponse
      */
-    public function deleteOne($id)
+    public function deleteOne(ElasticSearchIndexer $searchIndexer, $id)
     {
         $entity = $this->findOrFailEntity($id);
 
         $this->checkPermission(static::class.'@deleteOne', ['model' => $entity]);
 
-        $entity->delete();
+        $searchIndexer->deleteOneAndReindexRelated($entity);
 
         return $this->getResponse()->noContent();
     }
@@ -262,7 +272,7 @@ abstract class EntityController extends ApiController
      * @param  Request  $request
      * @return ApiResponse
      */
-    public function deleteMany(Request $request)
+    public function deleteMany(Request $request, ElasticSearchIndexer $searchIndexer)
     {
         $requestCollection = $request->json()->all();
 
@@ -270,9 +280,7 @@ abstract class EntityController extends ApiController
 
         $this->checkPermission(static::class.'@deleteMany', ['model' => $modelsCollection]);
 
-        $modelsCollection->each(function (BaseModel $model) {
-            $model->delete();
-        });
+        $searchIndexer->deleteManyAndReindexRelated($modelsCollection);
 
         return $this->getResponse()->noContent();
     }

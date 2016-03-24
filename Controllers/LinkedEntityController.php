@@ -13,6 +13,7 @@ namespace Spira\Core\Controllers;
 use Illuminate\Http\Request;
 use Spira\Core\Model\Model\BaseModel;
 use Spira\Core\Responder\Response\ApiResponse;
+use Spira\Core\Model\Model\ElasticSearchIndexer;
 
 abstract class LinkedEntityController extends AbstractRelatedEntityController
 {
@@ -30,7 +31,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
             ->collection($childEntities);
     }
 
-    public function attachOne(Request $request, $id, $childId)
+    public function attachOne(Request $request, ElasticSearchIndexer $searchIndexer, $id, $childId)
     {
         $parent = $this->findParentEntity($id);
 
@@ -47,6 +48,9 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->attach($childModel, $this->getPivotValues($childModel));
 
+        $searchIndexer->reindexOne($parent, []);
+        $searchIndexer->reindexOne($childModel, []);
+
         return $this->getResponse()->created();
     }
 
@@ -60,7 +64,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         return $this->processMany($request, $id, 'sync');
     }
 
-    public function detachOne($id, $childId)
+    public function detachOne(ElasticSearchIndexer $searchIndexer, $id, $childId)
     {
         $parent = $this->findParentEntity($id);
         $childModel = $this->findOrFailChildEntity($childId, $parent);
@@ -68,15 +72,27 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $this->checkPermission(static::class.'@detachOne', ['model' => $parent, 'children' => $childModel]);
         $this->getRelation($parent)->detach($childModel);
 
+        $searchIndexer->reindexOne($parent, []);
+        $searchIndexer->reindexOne($childModel, []);
+
         return $this->getResponse()->noContent();
     }
 
-    public function detachAll($id)
+    public function detachAll(ElasticSearchIndexer $searchIndexer, $id)
     {
         $parent = $this->findParentEntity($id);
 
         $this->checkPermission(static::class.'@detachAll', ['model' => $parent]);
+
+        $reindexItems = $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]);
+
         $this->getRelation($parent)->detach();
+
+        // Reindex parent entity
+        $searchIndexer->reindexOne($parent, []);
+
+        // Reindex all detached entities
+        $searchIndexer->reindexMany($reindexItems, []);
 
         return $this->getResponse()->noContent();
     }
@@ -95,9 +111,22 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
         $this->preSync($parent, $childModels);
 
         $this->saveNewItemsInCollection($childModels);
-        $this->getRelation($parent)->{$method}($this->makeSyncList($childModels, $requestCollection));
 
+        /** @var ElasticSearchIndexer $searchIndexer */
+        $searchIndexer = app(ElasticSearchIndexer::class);
+        $reindexItems = $searchIndexer->mergeUniqueCollection(
+            $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]),
+            $childModels
+        );
+
+        $this->getRelation($parent)->{$method}($this->makeSyncList($childModels, $requestCollection));
         $this->postSync($parent, $childModels);
+
+        // Reindex parent entity without relations
+        $searchIndexer->reindexOne($parent, []);
+
+        // Reindex all affected items without relations
+        $searchIndexer->reindexMany($reindexItems, []);
 
         $transformed = $this->getTransformer()->transformCollection($this->findAllChildren($parent), ['_self']);
 
