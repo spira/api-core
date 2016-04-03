@@ -68,7 +68,6 @@ class TransformInputDataMiddleware
     protected function transformRequestInput(Request $request, ParameterBag $input, $fieldsForDecode)
     {
         foreach ($input as $key => $value) {
-
             $snake_key = snake_case($key);
 
             if (in_array($snake_key, $fieldsForDecode)) {
@@ -88,7 +87,6 @@ class TransformInputDataMiddleware
             }
         }
     }
-
 
     /** Return normalized array of snake-cased fields for base64 decoding */
     protected function getFieldsForDecoding(Request $request)
