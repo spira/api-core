@@ -26,8 +26,10 @@ class TransformInputDataMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $this->transformRequestInput($request, $request->query);
-        $this->transformRequestInput($request, $request->json());
+        $fields = $this->getFieldsForDecoding($request);
+
+        $this->transformRequestInput($request, $request->query, $fields);
+        $this->transformRequestInput($request, $request->json(), $fields);
 
         return $next($request);
     }
@@ -45,7 +47,7 @@ class TransformInputDataMiddleware
         foreach ($array as $key => $value) {
 
             // Recursively check if the value is an array that needs parsing too
-            $value = (is_array($value)) ? $this->renameKeys($value) : $value;
+            $value = is_array($value) ? $this->renameKeys($value) : $value;
 
             // Convert camelCase to snake_case
             if (is_string($key) && ! ctype_lower($key)) {
@@ -63,10 +65,15 @@ class TransformInputDataMiddleware
      * @param Request $request
      * @param ParameterBag $input
      */
-    protected function transformRequestInput(Request $request, ParameterBag $input)
+    protected function transformRequestInput(Request $request, ParameterBag $input, $fieldsForDecode)
     {
         foreach ($input as $key => $value) {
-            $value = $this->extractEncodedJson($input, $key, $value);
+
+            $snake_key = snake_case($key);
+
+            if (in_array($snake_key, $fieldsForDecode)) {
+                $value = $this->extractEncodedJson($input, $key, $value);
+            }
 
             // Handle snakecase conversion in sub arrays
             if (is_array($value)) {
@@ -74,16 +81,19 @@ class TransformInputDataMiddleware
                 $input->set($key, $value);
             }
 
-            // Find any potential camelCase keys in the 'root' array, and convert
-            // them to snake_case
-            if (! ctype_lower($key)) {
-                // Only convert if the key will change
-                if ($key != snake_case($key)) {
-                    $input->set(snake_case($key), $value);
-                    $input->remove($key);
-                }
+            // Only convert camelCase keys in the 'root' array if the key will change
+            if ($key != $snake_key) {
+                $input->set($snake_key, $value);
+                $input->remove($key);
             }
         }
+    }
+
+
+    /** Return normalized array of snake-cased fields for base64 decoding */
+    protected function getFieldsForDecoding(Request $request)
+    {
+        return array_map('snake_case', explode(',', $request->headers->get('Base64-Encoded-Fields')));
     }
 
     /**
@@ -110,9 +120,9 @@ class TransformInputDataMiddleware
 
         $jsonParsed = json_decode($decoded, true);
 
-        //if value couldn't be json decoded, it wasn't valid json, return the original value
+        //if value couldn't be json decoded, it wasn't valid json, return the decoded value
         if (! $jsonParsed) {
-            return $value;
+            return $decoded;
         }
 
         $input->set($key, $jsonParsed);
