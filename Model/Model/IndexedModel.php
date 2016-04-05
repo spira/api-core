@@ -146,7 +146,7 @@ abstract class IndexedModel extends BaseModel
     }
 
     /**
-     * Return Elasticsearch client
+     * Return Elasticsearch client.
      *
      * @return Client
      */
