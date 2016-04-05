@@ -10,6 +10,7 @@
 
 namespace Spira\Core\Model\Model;
 
+use Elasticsearch\Client;
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Spira\Core\Model\Collection\IndexedCollection;
@@ -142,6 +143,16 @@ abstract class IndexedModel extends BaseModel
         $attributes = array_intersect_key($this->attributesToArray(), $this->getMappingProperties());
 
         return array_merge($attributes, $relations);
+    }
+
+    /**
+     * Return Elasticsearch client
+     *
+     * @return Client
+     */
+    public function getElasticSearchClient()
+    {
+        return app(Client::class);
     }
 
     protected static function boot()
