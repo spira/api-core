@@ -35,6 +35,9 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
  * @method static Builder whereNull($column)
  * @method static BaseModel skip($offset)
  * @method static BaseModel take($limit)
+ *
+ * * scopes
+ * @method static Builder getDefaultOrder modifies query to order by $defaultOrderBy
  */
 abstract class BaseModel extends Model
 {
@@ -48,6 +51,13 @@ abstract class BaseModel extends Model
     ];
 
     protected static $validationRules = [];
+
+    /**
+     * The default order by value.
+     *
+     * @var string
+     */
+    protected $defaultOrderBy;
 
     /**
      * Temporary fix of polymorphic relation naming.
@@ -312,5 +322,15 @@ abstract class BaseModel extends Model
     public static function booted($callback, $priority = 0)
     {
         static::registerModelEvent('booted', $callback, $priority);
+    }
+
+    /**
+     * Allows for default ordering of queries if required and specified
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeGetDefaultOrder(Builder $query) {
+        return ($this->defaultOrderBy) ? $query->orderBy($this->defaultOrderBy) : $query;
     }
 }
