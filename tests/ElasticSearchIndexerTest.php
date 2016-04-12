@@ -17,7 +17,7 @@ class ElasticSearchIndexerTest extends TestCase
 {
     /**
      * @expectedException \BadMethodCallException
-     * @expectedExceptionMessage Tried to reindex non-existant relation "badRelation" on model "Spira\Core\Model\Model\IndexedModel"
+     * @expectedExceptionMessage Tried to reindex non-existent relation "badRelation" on model "Spira\Core\Model\Model\IndexedModel"
      */
     public function testUnexistantRelationError()
     {
