@@ -325,12 +325,13 @@ abstract class BaseModel extends Model
     }
 
     /**
-     * Allows for default ordering of queries if required and specified
+     * Allows for default ordering of queries if required and specified.
      *
      * @param Builder $query
      * @return Builder
      */
-    public function scopeGetDefaultOrder(Builder $query) {
+    public function scopeGetDefaultOrder(Builder $query)
+    {
         return ($this->defaultOrderBy) ? $query->orderBy($this->defaultOrderBy) : $query;
     }
 }
