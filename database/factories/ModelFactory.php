@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE file that was distributed with this source code.
  */
 
+use Spira\Core\Model\Test\OrderedTestEntity;
 use Spira\Core\Model\Test\TestEntity;
 use Illuminate\Support\Facades\Hash;
 use Spira\Core\Model\Test\SecondTestEntity;
@@ -39,6 +40,14 @@ $factory->define(SecondTestEntity::class, function ($faker) {
         'entity_id' => $faker->uuid,
         'check_entity_id' => $faker->uuid,
         'value' => $faker->word,
+    ];
+});
+
+$factory->define(OrderedTestEntity::class, function ($faker) {
+    return [
+        'entity_id' => $faker->uuid,
+        'varchar' => $faker->word,
+        'integer' => $faker->numberBetween(0, 500),
     ];
 });
 

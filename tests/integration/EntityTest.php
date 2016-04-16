@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Mockery;
 use Rhumsaa\Uuid\Uuid;
 use Spira\Core\Model\Model\Localization;
+use Spira\Core\Model\Test\OrderedTestEntity;
 use Spira\Core\Model\Test\SecondTestEntity;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
@@ -121,6 +122,18 @@ class EntityTest extends TestCase
         $entity = $this->getFactory(TestEntity::class)->count(10)->create();
         $this->getJson('/test/entities');
 
+        $this->assertResponseOk();
+        $this->shouldReturnJson();
+        $this->assertJsonArray();
+        $this->assertJsonMultipleEntries();
+    }
+
+    public function testGetAllDefaultOrdered()
+    {
+        $entity = $this->getFactory(OrderedTestEntity::class)->count(10)->create();
+        $this->getJson('/test/ordered-entities');
+        
+        $this->assertArrayOrdered('varchar');
         $this->assertResponseOk();
         $this->shouldReturnJson();
         $this->assertJsonArray();
