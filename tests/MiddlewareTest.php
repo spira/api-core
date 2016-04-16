@@ -15,6 +15,25 @@ use Spira\Core\Middleware\TransformInputDataMiddleware;
 
 class MiddlewareTest extends TestCase
 {
+    public function testBase64Decode()
+    {
+        $enc = base64_encode(json_encode(['will_not_be_decoded']));
+
+        $request = new Request();
+        $request->headers->add([
+            'Base64-Encoded-Fields' => 'plainArray,some_string',
+        ]);
+        $request->offsetSet('plain_array', base64_encode(json_encode(['ololo' => 123])));
+        $request->offsetSet('someString', base64_encode('abc'));
+        $request->offsetSet('not_encoded', $enc);
+
+        $result = $this->executeRequestWithMiddleware($request)->all();
+
+        $this->assertEquals(123, array_get($result, 'plain_array.ololo'));
+        $this->assertEquals('abc', array_get($result, 'some_string'));
+        $this->assertEquals($enc, array_get($result, 'not_encoded'));
+    }
+
     /**
      * Test TransformInputData middleware.
      *
@@ -22,47 +41,41 @@ class MiddlewareTest extends TestCase
      */
     public function testTransformInputData()
     {
-        $mw = new TransformInputDataMiddleware();
+        $request = new Request([
+            'firstName' => 'foo',
+            'lastname'  => 'bar',
+        ]);
 
-        // Create a request object to test
-        $request = new Request();
-        $request->offsetSet('firstName', 'foo');
-        $request->offsetSet('lastname', 'bar');
+        $result = $this->executeRequestWithMiddleware($request)->all();
 
-        // And a next closure
-        $next = function ($request) { return $request; };
-
-        // Execute
-        $request = $mw->handle($request, $next);
-
-        // Assert
-        $this->assertArrayHasKey('first_name', $request->all());
-        $this->assertArrayNotHasKey('firstName', $request->all());
-        $this->assertArrayHasKey('lastname', $request->all());
+        $this->assertArrayEquals(['first_name', 'lastname'], array_keys($result));
     }
 
     public function testTransformInputDataNested()
     {
-        $mw = new TransformInputDataMiddleware();
-
         // Create a request object to test
         $request = new Request();
         $request->offsetSet('firstName', 'foo');
         $request->offsetSet('lastname', 'bar');
         $request->offsetSet('nestedArray', ['fooBar' => 'bar', 'foo' => 'bar', 'oneMore' => ['andThis' => true]]);
 
-        // And a next closure
-        $next = function ($request) { return $request; };
+        $result = $this->executeRequestWithMiddleware($request)->all();
 
-        // Execute
-        $request = $mw->handle($request, $next);
+        $this->assertArrayEquals(['first_name', 'lastname', 'nested_array'], array_keys($result));
+        $this->assertEquals('bar', array_get($result, 'nested_array.foo_bar'));
+        $this->assertTrue(array_get($result, 'nested_array.one_more.and_this'));
+    }
 
-        // Assert
-        $this->assertArrayHasKey('first_name', $request->all());
-        $this->assertArrayNotHasKey('firstName', $request->all());
-        $this->assertArrayHasKey('lastname', $request->all());
-        $this->assertArrayHasKey('nested_array', $request->all());
-        $this->assertArrayHasKey('foo_bar', $request->nested_array);
-        $this->assertArrayHasKey('and_this', $request->nested_array['one_more']);
+    /** @return Request */
+    protected function executeRequestWithMiddleware(Request $request)
+    {
+        $mw = new TransformInputDataMiddleware();
+
+        return $mw->handle(
+            $request,
+            function ($request) {
+                return $request;
+            }
+        );
     }
 }
