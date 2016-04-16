@@ -32,14 +32,12 @@ class OrderedTestEntity extends BaseModel implements LocalizableModelInterface
     public $table = 'ordered_test_entities';
     protected $primaryKey = 'entity_id';
     public $timestamps = false;
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = ['entity_id', 'varchar', 'integer'];
-    
     /**
      * Override default order by value.
      *

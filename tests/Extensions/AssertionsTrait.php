@@ -241,7 +241,7 @@ trait AssertionsTrait
         $this->assertTrue(is_array($array), 'Expected response is json array for order comparison');
 
         $ordered = true;
-        $prevVal = NULL;
+        $prevVal = null;
         foreach ($array as $k => $v) {
             // First item, nothing to compare to so set and bail
             if (empty($prevVal)) {
