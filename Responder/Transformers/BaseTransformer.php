@@ -15,7 +15,7 @@ use Spira\Core\Model\Collection\Collection;
 use Spira\Core\Responder\Contract\TransformerInterface;
 use Spira\Core\Responder\TransformerService;
 
-abstract class BaseTransformer extends TransformerAbstract  implements TransformerInterface
+abstract class BaseTransformer extends TransformerAbstract implements TransformerInterface
 {
     /**
      * @var TransformerService

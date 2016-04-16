@@ -132,7 +132,6 @@ class EntityTest extends TestCase
     {
         $entity = $this->getFactory(OrderedTestEntity::class)->count(10)->create();
         $this->getJson('/test/ordered-entities');
-        
         $this->assertArrayOrdered('varchar');
         $this->assertResponseOk();
         $this->shouldReturnJson();

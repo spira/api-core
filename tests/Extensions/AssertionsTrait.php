@@ -242,7 +242,7 @@ trait AssertionsTrait
 
         $ordered = true;
         $prevVal = NULL;
-        foreach($array as $k => $v) {
+        foreach ($array as $k => $v) {
             // First item, nothing to compare to so set and bail
             if (empty($prevVal)) {
                 $prevVal = $v[$orderByKey];
@@ -259,7 +259,7 @@ trait AssertionsTrait
             $prevVal = $v[$orderByKey];
         }
 
-        $this->assertTrue($ordered, 'Expected json response ordered by ' . $orderByKey);
+        $this->assertTrue($ordered, 'Expected json response ordered by '.$orderByKey);
 
         return $this;
     }

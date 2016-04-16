@@ -30,9 +30,7 @@ class OrderedTestEntity extends BaseModel implements LocalizableModelInterface
      * @var string
      */
     public $table = 'ordered_test_entities';
-
     protected $primaryKey = 'entity_id';
-    
     public $timestamps = false;
 
     /**
@@ -48,5 +46,4 @@ class OrderedTestEntity extends BaseModel implements LocalizableModelInterface
      * @var string
      */
     protected $defaultOrderBy = 'varchar';
-    
 }
