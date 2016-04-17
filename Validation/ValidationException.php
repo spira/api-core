@@ -16,7 +16,7 @@ use Spira\Core\Responder\Contract\TransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class ValidationException extends HttpException implements  TransformableInterface
+class ValidationException extends HttpException implements TransformableInterface
 {
     /**
      * The validation error messages.

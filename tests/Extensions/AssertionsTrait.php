@@ -228,4 +228,39 @@ trait AssertionsTrait
             throw $e;
         }
     }
+
+    /**
+     * Assert array is ordered.
+     *
+     * @return $this
+     */
+    public function assertArrayOrdered($orderByKey)
+    {
+        $array = json_decode($this->response->getContent(), true);
+
+        $this->assertTrue(is_array($array), 'Expected response is json array for order comparison');
+
+        $ordered = true;
+        $prevVal = null;
+        foreach ($array as $k => $v) {
+            // First item, nothing to compare to so set and bail
+            if (empty($prevVal)) {
+                $prevVal = $v[$orderByKey];
+                continue;
+            }
+
+            // Compare current item to previous item
+            if ($v[$orderByKey] < $prevVal) {
+                $ordered = false;
+                break;
+            }
+
+            // Set previous item for the next comparison
+            $prevVal = $v[$orderByKey];
+        }
+
+        $this->assertTrue($ordered, 'Expected json response ordered by '.$orderByKey);
+
+        return $this;
+    }
 }

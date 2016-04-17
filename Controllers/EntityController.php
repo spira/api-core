@@ -385,7 +385,7 @@ abstract class EntityController extends ApiController
      */
     protected function getAllEntities($limit = null, $offset = null)
     {
-        return $this->getModel()->take($limit)->skip($offset)->get();
+        return $this->getModel()->getDefaultOrder()->take($limit)->skip($offset)->get();
     }
 
     /**

@@ -46,6 +46,7 @@ $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Applicati
     $app->get('test/internal-exception', 'TestController@internalException');
     $app->get('test/fatal-error', 'TestController@fatalError');
     $app->get('test/entities', 'TestController@getAll');
+    $app->get('test/ordered-entities', 'OrderedEntityTestController@getOrdered');
     $app->get('test/entities/pages', 'TestController@getAllPaginated');
     $app->get('test/entities/search', 'TestController@searchPaginated');
     $app->get('test/entities_encoded/{id}', 'TestController@urlEncode');
