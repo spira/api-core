@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 class ElasticSearchIndexerTest extends TestCase
 {
     /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Tried to reindex unexistant relation "badRelation" on model "Spira\Core\Model\Model\IndexedModel"
+     * @expectedException \BadMethodCallException
+     * @expectedExceptionMessage Tried to reindex non-existent relation "badRelation" on model "Spira\Core\Model\Model\IndexedModel"
      */
     public function testUnexistantRelationError()
     {

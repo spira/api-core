@@ -107,7 +107,7 @@ class ElasticSearchIndexer
     protected function getRelationItems(IndexedModel $model, $relation)
     {
         if (! method_exists($model, $relation)) {
-            throw new \Exception(sprintf('Tried to reindex unexistant relation "%s" on model "%s"', $relation, $model->getMorphClass()));
+            throw new \BadMethodCallException(sprintf('Tried to reindex non-existent relation "%s" on model "%s"', $relation, $model->getMorphClass()));
         }
 
         /** @var Relation $rel */
