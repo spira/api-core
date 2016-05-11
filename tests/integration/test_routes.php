@@ -71,7 +71,6 @@ $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Applicati
     $app->post('test/many-non-indexed/{id}/children-non-indexed', 'LinkedEntityTestControllerNonIndexed@attachMany');
     $app->delete('test/many-non-indexed/{id}/children-non-indexed/{childId}', 'LinkedEntityTestControllerNonIndexed@detachOne');
     $app->delete('test/many-non-indexed/{id}/children-non-indexed', 'LinkedEntityTestControllerNonIndexed@detachAll');
-    
     $app->get('test/simple-auth', 'ControllerWithAuth@getOne');
     $app->get('test/default-auth', 'ControllerWithDefaultAuth@getOne');
 });
