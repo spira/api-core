@@ -18,7 +18,7 @@ use Spira\Core\Model\Model\ElasticSearchIndexer;
 abstract class LinkedEntityController extends AbstractRelatedEntityController
 {
     /**
-     * @var Boolean
+     * @var bool
      */
     protected $isIndexed = true;
     
