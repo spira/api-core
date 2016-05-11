@@ -17,8 +17,6 @@ use Spira\Core\Responder\Transformers\EloquentModelTransformer;
 class LinkedEntityTestController extends LinkedEntityController
 {
     protected $relationName = 'secondTestEntities';
-
-    
     public function __construct(TestEntity $parentModel, EloquentModelTransformer $transformer)
     {
         parent::__construct($parentModel, $transformer);
