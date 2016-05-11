@@ -27,6 +27,7 @@ use Spira\Core\tests\TestCase;
 /**
  * Class ChildEntityTest.
  * @group integration
+ * @group child-entity
  */
 class ChildEntityTest extends TestCase
 {
@@ -681,6 +682,159 @@ class ChildEntityTest extends TestCase
 
         // Check that the cached localization has been removed
         $this->assertEquals(Localization::getFromCache($localizationModel->localizable_id, $localizationModel->region_code), null);
+    }
+
+    public function testPostOneValidNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+        $childEntity = factory(SecondTestEntity::class)->make();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+
+        $this->withAuthorization()->postJson('/test-not-indexed/entities/'.$entity->entity_id.'/child', $this->prepareEntity($childEntity));
+
+        $this->shouldReturnJson();
+        $this->assertResponseStatus(201);
+    }
+
+    public function testPutOneNewNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+        $childEntity = factory(SecondTestEntity::class)->make();
+        $childEntityTransformed = $this->prepareEntity($childEntity);
+
+        $rowCount = TestEntity::find($entity->entity_id)->testMany->count();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+
+        $this->withAuthorization()
+            ->putJson('/test-not-indexed/entities/'.$entity->entity_id.'/child/'.$childEntityTransformed['entityId'], $childEntityTransformed);
+
+        $object = json_decode($this->response->getContent());
+
+        $this->assertResponseStatus(201);
+        $this->assertEquals($rowCount + 1, TestEntity::find($entity->entity_id)->testMany->count());
+        $this->assertTrue(is_object($object));
+    }
+
+    public function testPutManyNewNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+
+        $childEntities = factory(SecondTestEntity::class, 5)->make();
+        $childEntities = array_map(function ($entity) {
+            return $this->prepareEntity($entity);
+        }, $childEntities->all());
+
+        $childCount = TestEntity::find($entity->entity_id)->testMany->count();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+        $mock->shouldNotReceive('reindexMany');
+
+        $this->withAuthorization()->putJson('/test-not-indexed/entities/'.$entity->entity_id.'/children', $childEntities);
+
+        $object = json_decode($this->response->getContent());
+
+        $this->assertResponseStatus(201);
+        $this->assertEquals($childCount + 5, TestEntity::find($entity->entity_id)->testMany->count());
+        $this->assertTrue(is_array($object));
+        $this->assertCount(5, $object);
+    }
+
+    public function testPatchOneNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+        $childEntity = $entity->testMany->first();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+
+        $this->withAuthorization()->patchJson('/test-not-indexed/entities/'.$entity->entity_id.'/child/'.$childEntity->entity_id, ['value' => 'foobar']);
+
+        $entity = TestEntity::find($entity->entity_id);
+        /** @var Collection $childEntities */
+        $childEntities = $entity->testMany;
+        $childEntity = $childEntities->find($childEntity->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        $this->assertEquals('foobar', $childEntity->value);
+    }
+
+    public function testPatchManyNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+
+        $childEntities = $entity->testMany;
+        $data = array_map(function ($entity) {
+            return [
+                'entityId' => $entity->entity_id,
+                'value'   => 'foobar',
+            ];
+        }, $childEntities->all());
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+        $mock->shouldNotReceive('reindexMany');
+
+        $this->withAuthorization()->patchJson('/test-not-indexed/entities/'.$entity->entity_id.'/children', $data);
+
+        $entity = TestEntity::find($entity->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        foreach ($entity->testMany as $childEntity) {
+            $this->assertEquals('foobar', $childEntity->value);
+        }
+    }
+
+    public function testDeleteOneNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+        $childEntity = $entity->testMany->first();
+        $childCount = TestEntity::find($entity->entity_id)->testMany->count();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('deleteOneAndReindexRelated');
+
+        $this->withAuthorization()->deleteJson('/test-not-indexed/entities/'.$entity->entity_id.'/child/'.$childEntity->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        $this->assertEquals($childCount - 1, TestEntity::find($entity->entity_id)->testMany->count());
+    }
+
+    public function testDeleteManyNotIndexed()
+    {
+        $entity = factory(TestEntity::class)->create();
+        $this->addRelatedEntities($entity);
+        $childCount = TestEntity::find($entity->entity_id)->testMany->count();
+
+        $childEntities = $entity->testMany;
+        $data = array_map(function ($entity) {
+            return [
+                'entityId' => $entity->entity_id,
+                'value'   => 'foobar',
+            ];
+        }, $childEntities->all());
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('deleteManyAndReindexRelated');
+
+        $this->withAuthorization()->deleteJson('/test-not-indexed/entities/'.$entity->entity_id.'/children', $data);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+        $this->assertEquals($childCount - 5, TestEntity::find($entity->entity_id)->testMany->count());
     }
 }
 
