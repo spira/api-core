@@ -38,6 +38,11 @@ abstract class AbstractRelatedEntityController extends ApiController
      */
     protected $parentModel;
 
+    /**
+     * @var bool
+     */
+    protected $isIndexed = true;
+
     public function __construct(BaseModel $parentModel, TransformerInterface $transformer)
     {
         $this->parentModel = $parentModel;

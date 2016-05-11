@@ -17,11 +17,6 @@ use Spira\Core\Model\Model\ElasticSearchIndexer;
 
 abstract class LinkedEntityController extends AbstractRelatedEntityController
 {
-    /**
-     * @var bool
-     */
-    protected $isIndexed = true;
-
     public function getAll(Request $request, $id)
     {
         $model = $this->findParentEntity($id);

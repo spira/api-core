@@ -14,7 +14,7 @@ use Spira\Core\Controllers\LinkedEntityController;
 use Spira\Core\Model\Test\TestEntity;
 use Spira\Core\Responder\Transformers\EloquentModelTransformer;
 
-class LinkedEntityTestControllerNonIndexed extends LinkedEntityController
+class LinkedEntityTestControllerNotIndexed extends LinkedEntityController
 {
     protected $relationName = 'secondTestEntities';
     protected $isIndexed = false;

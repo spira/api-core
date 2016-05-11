@@ -215,7 +215,7 @@ class LinkedEntityTest extends TestCase
         return $first;
     }
 
-    public function testAttachOneNoIndexing()
+    public function testAttachOneNotIndexed()
     {
         /** @var $entity TestEntity */
         $entity = $this->getFactory(TestEntity::class)->create();
@@ -225,7 +225,10 @@ class LinkedEntityTest extends TestCase
         $transformed = $factory->transformed();
         $transformed['value'] = 'ololo';
 
-        $this->putJson('test/many-non-indexed/'.$entity->entity_id.'/children-non-indexed/'.$second->entity_id, $transformed);
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldNotReceive('reindexOne');
+
+        $this->putJson('test-not-indexed/many/'.$entity->entity_id.'/children/'.$second->entity_id, $transformed);
 
         $this->assertResponseStatus(201);
         $this->assertResponseHasNoContent();
@@ -235,7 +238,7 @@ class LinkedEntityTest extends TestCase
         $this->assertEquals('ololo', $comparedEntity->value);
     }
 
-    public function testAttachManyNoIndexing()
+    public function testAttachManyNotIndexed()
     {
         $entity = $this->makeEntity();
         $factory = $this->getFactory(SecondTestEntity::class);
@@ -247,18 +250,17 @@ class LinkedEntityTest extends TestCase
         );
 
         $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldReceive('getAllItemsFromRelations')->andReturn($entity->secondTestEntities);
+        $mock->shouldNotReceive('reindexOne');
+        $mock->shouldNotReceive('getAllItemsFromRelations');
+        $mock->shouldNotReceive('reindexMany');
 
-        $this->expectElasticSearchReindexOne($entity, [], $mock);
-        $this->expectElasticSearchReindexMany(3 + $entity->secondTestEntities->count(), [], $mock);
-
-        $this->postJson('test/many/'.$entity->entity_id.'/children', $factory->transformed());
+        $this->postJson('test-not-indexed/many/'.$entity->entity_id.'/children', $factory->transformed());
 
         $this->assertResponseStatus(201);
         $this->assertArrayEquals($ids, $entity->secondTestEntities()->get()->pluck('entity_id')->toArray());
     }
 
-    public function testSyncManyNoIndexing()
+    public function testSyncManyNotIndexed()
     {
         $entity = $this->makeEntity();
         $factory = $this->getFactory(SecondTestEntity::class);
@@ -270,12 +272,11 @@ class LinkedEntityTest extends TestCase
             ->transformed();
 
         $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldReceive('getAllItemsFromRelations')->andReturn($entity->secondTestEntities);
+        $mock->shouldNotReceive('reindexOne');
+        $mock->shouldNotReceive('getAllItemsFromRelations');
+        $mock->shouldNotReceive('reindexMany');
 
-        $this->expectElasticSearchReindexOne($entity, [], $mock);
-        $this->expectElasticSearchReindexMany(3 + $entity->secondTestEntities->count(), [], $mock);
-
-        $this->putJson('test/many/'.$entity->entity_id.'/children', $transformed);
+        $this->putJson('test-not-indexed/many/'.$entity->entity_id.'/children', $transformed);
 
         $this->assertResponseStatus(201);
 
@@ -288,16 +289,15 @@ class LinkedEntityTest extends TestCase
         );
     }
 
-    public function testDetachOneNoIndexing()
+    public function testDetachOneNotIndexed()
     {
         $entity = $this->makeEntity();
         $second = $entity->secondTestEntities()->first();
 
         $mock = $this->mockElasticSearchIndexer();
-        $this->expectElasticSearchReindexOne($entity, [], $mock);
-        $this->expectElasticSearchReindexOne($second, [], $mock);
+        $mock->shouldNotReceive('reindexOne');
 
-        $this->deleteJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id);
+        $this->deleteJson('test-not-indexed/many/'.$entity->entity_id.'/children/'.$second->entity_id);
 
         $this->assertResponseStatus(204);
         $this->assertResponseHasNoContent();
@@ -308,18 +308,16 @@ class LinkedEntityTest extends TestCase
         );
     }
 
-    public function testDetachAllNoIndexing()
+    public function testDetachAllNotIndexed()
     {
         $entity = $this->makeEntity();
-        $attached = $entity->secondTestEntities;
 
         $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldReceive('getAllItemsFromRelations')->once()->andReturn($attached);
+        $mock->shouldNotReceive('reindexOne');
+        $mock->shouldNotReceive('getAllItemsFromRelations');
+        $mock->shouldNotReceive('reindexMany');
 
-        $this->expectElasticSearchReindexOne($entity, [], $mock);
-        $this->expectElasticSearchReindexMany($attached->count(), [], $mock);
-
-        $this->deleteJson('test/many/'.$entity->entity_id.'/children');
+        $this->deleteJson('test-not-indexed/many/'.$entity->entity_id.'/children');
 
         $this->assertResponseStatus(204);
         $this->assertResponseHasNoContent();

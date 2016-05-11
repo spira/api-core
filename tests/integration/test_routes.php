@@ -24,17 +24,37 @@ $app->group(['namespace' => 'Spira\Core\tests\integration', 'middleware' => 'req
     $app->put('test/entities/{id}/localizations/{region}', 'TestController@putOneLocalization');
 
     $app->post('test/entities/{id}/child', 'ChildTestController@postOne');
+    $app->post('test-not-indexed/entities/{id}/child', 'ChildTestControllerNotIndexed@postOne');
+
     $app->put('test/entities/{id}/child', 'ChildTestController@putOne');
+    $app->put('test-not-indexed/entities/{id}/child', 'ChildTestControllerNotIndexed@putOne');
+
     $app->put('test/entities/{id}/child/{childId}', 'ChildTestController@putOne');
+    $app->put('test-not-indexed/entities/{id}/child/{childId}', 'ChildTestControllerNotIndexed@putOne');
+
     $app->put('test/entities/{id}/children', 'ChildTestController@putMany');
+    $app->put('test-not-indexed/entities/{id}/children', 'ChildTestControllerNotIndexed@putMany');
     $app->put('test/entities/{id}/childrenbelongs', 'ChildTestControllerBelongs@putMany');
+
     $app->post('test/entities/{id}/children', 'ChildTestController@postMany');
+
     $app->patch('test/entities/{id}/child/{childId}', 'ChildTestController@patchOne');
+    $app->patch('test-not-indexed/entities/{id}/child/{childId}', 'ChildTestControllerNotIndexed@patchOne');
+
     $app->patch('test/entities/{id}/child', 'ChildTestController@patchOne');
+    $app->patch('test-not-indexed/entities/{id}/child', 'ChildTestControllerNotIndexed@patchOne');
+
     $app->patch('test/entities/{id}/children', 'ChildTestController@patchMany');
+    $app->patch('test-not-indexed/entities/{id}/children', 'ChildTestControllerNotIndexed@patchMany');
+
     $app->delete('test/entities/{id}/child/{childId}', 'ChildTestController@deleteOne');
+    $app->delete('test-not-indexed/entities/{id}/child/{childId}', 'ChildTestControllerNotIndexed@deleteOne');
+
     $app->delete('test/entities/{id}/child', 'ChildTestController@deleteOne');
+    $app->delete('test-not-indexed/entities/{id}/child', 'ChildTestControllerNotIndexed@deleteOne');
+
     $app->delete('test/entities/{id}/children', 'ChildTestController@deleteMany');
+    $app->delete('test-not-indexed/entities/{id}/children', 'ChildTestControllerNotIndexed@deleteMany');
 
     $app->put('test/entities/{id}/child/{childId}/localizations/{region}', 'ChildTestController@putOneChildLocalization');
 });
@@ -62,15 +82,20 @@ $app->group(['namespace' => 'Spira\Core\tests\integration'], function (Applicati
 
     $app->get('test/many/{id}/children', 'LinkedEntityTestController@getAll');
     $app->put('test/many/{id}/children', 'LinkedEntityTestController@syncMany');
+    $app->put('test-not-indexed/many/{id}/children', 'LinkedEntityTestControllerNotIndexed@syncMany');
+
     $app->post('test/many/{id}/children', 'LinkedEntityTestController@attachMany');
+    $app->post('test-not-indexed/many/{id}/children', 'LinkedEntityTestControllerNotIndexed@attachMany');
+
     $app->put('test/many/{id}/children/{childId}', 'LinkedEntityTestController@attachOne');
+    $app->put('test-not-indexed/many/{id}/children/{childId}', 'LinkedEntityTestControllerNotIndexed@attachOne');
+
     $app->delete('test/many/{id}/children/{childId}', 'LinkedEntityTestController@detachOne');
+    $app->delete('test-not-indexed/many/{id}/children/{childId}', 'LinkedEntityTestControllerNotIndexed@detachOne');
+
     $app->delete('test/many/{id}/children', 'LinkedEntityTestController@detachAll');
-    $app->put('test/many-non-indexed/{id}/children-non-indexed/{childId}', 'LinkedEntityTestControllerNonIndexed@attachOne');
-    $app->put('test/many-non-indexed/{id}/children-non-indexed', 'LinkedEntityTestControllerNonIndexed@syncMany');
-    $app->post('test/many-non-indexed/{id}/children-non-indexed', 'LinkedEntityTestControllerNonIndexed@attachMany');
-    $app->delete('test/many-non-indexed/{id}/children-non-indexed/{childId}', 'LinkedEntityTestControllerNonIndexed@detachOne');
-    $app->delete('test/many-non-indexed/{id}/children-non-indexed', 'LinkedEntityTestControllerNonIndexed@detachAll');
+    $app->delete('test-not-indexed/many/{id}/children', 'LinkedEntityTestControllerNotIndexed@detachAll');
+
     $app->get('test/simple-auth', 'ControllerWithAuth@getOne');
     $app->get('test/default-auth', 'ControllerWithDefaultAuth@getOne');
 });
