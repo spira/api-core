@@ -326,8 +326,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         if ($this->isIndexed) {
             $searchIndexer->deleteOneAndReindexRelated($childModel);
-        }
-        else {
+        } else {
             $childModel->delete();
         }
 
@@ -354,9 +353,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         if ($this->isIndexed) {
             $searchIndexer->deleteManyAndReindexRelated($childModels);
-        }
-        else {
-            $childModels->each(function($childModel) {
+        } else {
+            $childModels->each(function ($childModel) {
                 $childModel->delete();
             });
         }
