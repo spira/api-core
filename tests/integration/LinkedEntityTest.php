@@ -18,6 +18,7 @@ use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
 /**
  * Class LinkedEntityTest.
  * @group integration
+ * @group linked-entity
  */
 class LinkedEntityTest extends TestCase
 {
@@ -212,5 +213,117 @@ class LinkedEntityTest extends TestCase
         $first->secondTestEntities()->first()->testEntities()->sync($firstIds);
 
         return $first;
+    }
+
+    public function testAttachOneNoIndexing()
+    {
+        /** @var $entity TestEntity */
+        $entity = $this->getFactory(TestEntity::class)->create();
+        $factory = $this->getFactory(SecondTestEntity::class);
+        $second = $factory->create();
+
+        $transformed = $factory->transformed();
+        $transformed['value'] = 'ololo';
+
+        $this->putJson('test/many-non-indexed/'.$entity->entity_id.'/children-non-indexed/'.$second->entity_id, $transformed);
+
+        $this->assertResponseStatus(201);
+        $this->assertResponseHasNoContent();
+
+        $comparedEntity = $entity->secondTestEntities()->first();
+        $this->assertEquals($second->entity_id, $comparedEntity->entity_id);
+        $this->assertEquals('ololo', $comparedEntity->value);
+    }
+
+    public function testAttachManyNoIndexing()
+    {
+        $entity = $this->makeEntity();
+        $factory = $this->getFactory(SecondTestEntity::class);
+        $newEntities = $factory->count(3)->create();
+
+        $ids = array_merge(
+            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
+            $newEntities->pluck('entity_id')->toArray()
+        );
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldReceive('getAllItemsFromRelations')->andReturn($entity->secondTestEntities);
+
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
+        $this->expectElasticSearchReindexMany(3 + $entity->secondTestEntities->count(), [], $mock);
+
+        $this->postJson('test/many/'.$entity->entity_id.'/children', $factory->transformed());
+
+        $this->assertResponseStatus(201);
+        $this->assertArrayEquals($ids, $entity->secondTestEntities()->get()->pluck('entity_id')->toArray());
+    }
+
+    public function testSyncManyNoIndexing()
+    {
+        $entity = $this->makeEntity();
+        $factory = $this->getFactory(SecondTestEntity::class);
+        $factory->count(3)->create();
+
+        $transformed = $factory->transformed();
+        $transformed[] = $this->getFactory(SecondTestEntity::class)
+            ->setModel($entity->secondTestEntities()->first())
+            ->transformed();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldReceive('getAllItemsFromRelations')->andReturn($entity->secondTestEntities);
+
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
+        $this->expectElasticSearchReindexMany(3 + $entity->secondTestEntities->count(), [], $mock);
+
+        $this->putJson('test/many/'.$entity->entity_id.'/children', $transformed);
+
+        $this->assertResponseStatus(201);
+
+        $this->assertCount(4, array_pluck($this->getJsonResponseAsArray(), '_self'));
+
+        $this->assertArrayEquals(
+            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
+            $transformed,
+            'entityId'
+        );
+    }
+
+    public function testDetachOneNoIndexing()
+    {
+        $entity = $this->makeEntity();
+        $second = $entity->secondTestEntities()->first();
+
+        $mock = $this->mockElasticSearchIndexer();
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
+        $this->expectElasticSearchReindexOne($second, [], $mock);
+
+        $this->deleteJson('test/many/'.$entity->entity_id.'/children/'.$second->entity_id);
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+
+        $this->assertNotContains(
+            $second->entity_id,
+            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray()
+        );
+    }
+
+    public function testDetachAllNoIndexing()
+    {
+        $entity = $this->makeEntity();
+        $attached = $entity->secondTestEntities;
+
+        $mock = $this->mockElasticSearchIndexer();
+        $mock->shouldReceive('getAllItemsFromRelations')->once()->andReturn($attached);
+
+        $this->expectElasticSearchReindexOne($entity, [], $mock);
+        $this->expectElasticSearchReindexMany($attached->count(), [], $mock);
+
+        $this->deleteJson('test/many/'.$entity->entity_id.'/children');
+
+        $this->assertResponseStatus(204);
+        $this->assertResponseHasNoContent();
+
+        $this->assertTrue($entity->secondTestEntities()->get()->isEmpty());
     }
 }
