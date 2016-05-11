@@ -21,7 +21,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
      * @var bool
      */
     protected $isIndexed = true;
-    
+
     public function getAll(Request $request, $id)
     {
         $model = $this->findParentEntity($id);
@@ -57,7 +57,7 @@ abstract class LinkedEntityController extends AbstractRelatedEntityController
             $searchIndexer->reindexOne($parent, []);
             $searchIndexer->reindexOne($childModel, []);
         }
-        
+
         return $this->getResponse()->created();
     }
 
