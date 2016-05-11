@@ -18,6 +18,7 @@ class LinkedEntityTestControllerNonIndexed extends LinkedEntityController
 {
     protected $relationName = 'secondTestEntities';
     protected $isIndexed = false;
+    
     public function __construct(TestEntity $parentModel, EloquentModelTransformer $transformer)
     {
         parent::__construct($parentModel, $transformer);
