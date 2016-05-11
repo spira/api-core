@@ -25,7 +25,7 @@ use Spira\Core\tests\Extensions\WithAuthorizationMockTrait;
 use Spira\Core\tests\TestCase;
 
 /**
- * Class ChildEntityTest
+ * Class ChildEntityTest.
  * @group integration
  * @group child-entity
  */
