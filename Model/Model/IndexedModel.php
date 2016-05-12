@@ -153,10 +153,11 @@ abstract class IndexedModel extends BaseModel
      * @param Model $model
      * @return array
      */
-    private function getModelAttributes(Model $model) {
+    private function getModelAttributes(Model $model)
+    {
         $attributes = $model->attributesToArray();
 
-        if($model->pivot) {
+        if ($model->pivot) {
             $attributes['_pivot'] = $model->pivot->toArray();
         }
 
