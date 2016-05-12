@@ -125,7 +125,7 @@ abstract class IndexedModel extends BaseModel
                 /** @var IndexedModel|IndexedCollection $results */
                 $results = $this->$nestedModelName()->getResults();
 
-                $nestedModelMappingProperties = $this->mappingProperties['_' . $nestedModelName];
+                $nestedModelMappingProperties = $this->mappingProperties['_'.$nestedModelName];
 
                 if (is_null($results)) {
                     break;
@@ -134,9 +134,9 @@ abstract class IndexedModel extends BaseModel
                         return array_intersect_key($result->attributesToArray(), $nestedModelMappingProperties);
                     });
 
-                    $relations['_' . $nestedModelName] = $nestedData;
+                    $relations['_'.$nestedModelName] = $nestedData;
                 } else {
-                    $relations['_' . $nestedModelName] = array_intersect_key($results->attributesToArray(), $nestedModelMappingProperties);
+                    $relations['_'.$nestedModelName] = array_intersect_key($results->attributesToArray(), $nestedModelMappingProperties);
                 }
             }
         }
