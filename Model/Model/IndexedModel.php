@@ -148,6 +148,22 @@ abstract class IndexedModel extends BaseModel
     }
 
     /**
+     * Get all attributes of a model including pivot.
+     *
+     * @param Model $model
+     * @return array
+     */
+    private function getModelAttributes(Model $model) {
+        $attributes = $model->attributesToArray();
+
+        if($model->pivot) {
+            $attributes['_pivot'] = $model->pivot->toArray();
+        }
+
+        return $attributes;
+    }
+
+    /**
      * Return Elasticsearch client.
      *
      * @return Client
