@@ -150,10 +150,10 @@ abstract class IndexedModel extends BaseModel
     /**
      * Get all attributes of a model including pivot.
      *
-     * @param Model $model
+     * @param BaseModel $model
      * @return array
      */
-    private function getModelAttributes(Model $model)
+    private function getModelAttributes(BaseModel $model)
     {
         $attributes = $model->attributesToArray();
 
