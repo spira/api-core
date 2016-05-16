@@ -496,7 +496,7 @@ abstract class EntityController extends ApiController
 
                 foreach ($value[$fieldKey] as $fieldValue) {
                     if (! empty($fieldValue)) {
-                        $snakeKey = snake_case(substr($key, 1));
+                        $snakeKey = snake_case($key);
                         array_push($processedQuery['query']['bool']['must'],
                             [
                                 'nested' => [
