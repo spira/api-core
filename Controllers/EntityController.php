@@ -310,9 +310,9 @@ abstract class EntityController extends ApiController
             }
 
             $collection = $this->getAllEntities($limit, $offset);
+            $collection = $this->getWithNested($collection, $request);
         }
 
-        $collection = $this->getWithNested($collection, $request);
         $this->checkPermission(static::class.'@'.$permission, ['model' => $collection]);
 
         return $this->getResponse()
