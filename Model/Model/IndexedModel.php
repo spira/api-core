@@ -128,7 +128,7 @@ abstract class IndexedModel extends BaseModel
                 $nestedModelMappingProperties = $this->mappingProperties['_'.$nestedModelName]['properties'];
 
                 if (is_null($results)) {
-                    break;
+                    // Move to next relation
                 } elseif ($results instanceof Collection) {
                     $nestedData = $results->map(function (BaseModel $result) use ($nestedModelMappingProperties) {
                         return array_intersect_key($this->getModelAttributes($result), $nestedModelMappingProperties);
