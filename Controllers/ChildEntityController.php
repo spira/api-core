@@ -87,10 +87,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->save($childModel);
 
-        if ($this->isIndexed) {
-            // Children is auto updated, so need only to update parent
-            $searchIndexer->reindexOne($parent, []);
-        }
+        // Children is auto updated, so need only to update parent
+        $searchIndexer->reindexOne($parent, []);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -121,10 +119,8 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->saveMany($childModels);
 
-        if ($this->isIndexed) {
-            // Children is auto updated, so need only to update parent
-            $searchIndexer->reindexOne($parent, []);
-        }
+        // Children is auto updated, so need only to update parent
+        $searchIndexer->reindexOne($parent, []);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -163,13 +159,11 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->save($childModel);
 
-        if ($this->isIndexed) {
-            // Parent should be reindexed itself
-            $searchIndexer->reindexOne($parent, []);
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
 
-            // Need to reindex childModel and all relations
-            $searchIndexer->reindexOne($childModel);
-        }
+        // Need to reindex childModel and all relations
+        $searchIndexer->reindexOne($childModel);
 
         return $this->getResponse()
             ->transformer($this->getTransformer())
@@ -198,6 +192,12 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@putMany', ['model' => $parent, 'children' => $childModels]);
 
+        // Collect all affected items
+        $reindexItems = $searchIndexer->mergeUniqueCollection(
+            $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]),
+            $childModels
+        );
+
         $relation = $this->getRelation($parent);
 
         if ($relation instanceof BelongsToMany) {
@@ -207,19 +207,11 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
             $relation->saveMany($childModels);
         }
 
-        if ($this->isIndexed) {
-            // Collect all affected items
-            $reindexItems = $searchIndexer->mergeUniqueCollection(
-                $searchIndexer->getAllItemsFromRelations($parent, [$this->relationName]),
-                $childModels
-            );
+        // We need to reindex all affected items with relations
+        $searchIndexer->reindexMany($reindexItems);
 
-            // We need to reindex all affected items with relations
-            $searchIndexer->reindexMany($reindexItems);
-
-            // Reindex parent without relations
-            $searchIndexer->reindexOne($parent, []);
-        }
+        // Reindex parent without relations
+        $searchIndexer->reindexOne($parent, []);
 
         $this->postSync($parent, $childModels);
 
@@ -259,13 +251,11 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->save($childModel);
 
-        if ($this->isIndexed) {
-            // Parent should be reindexed itself
-            $searchIndexer->reindexOne($parent, []);
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
 
-            // Need to reindex childModel and all relations
-            $searchIndexer->reindexOne($childModel);
-        }
+        // Need to reindex childModel and all relations
+        $searchIndexer->reindexOne($childModel);
 
         return $this->getResponse()->noContent();
     }
@@ -292,13 +282,11 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->getRelation($parent)->saveMany($childModels);
 
-        if ($this->isIndexed) {
-            // Parent should be reindexed itself
-            $searchIndexer->reindexOne($parent, []);
+        // Parent should be reindexed itself
+        $searchIndexer->reindexOne($parent, []);
 
-            // We need to reindex all items with relations
-            $searchIndexer->reindexMany($childModels);
-        }
+        // We need to reindex all items with relations
+        $searchIndexer->reindexMany($childModels);
 
         return $this->getResponse()->noContent();
     }
@@ -324,11 +312,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@deleteOne', ['model' => $parent, 'children' => $childModel]);
 
-        if ($this->isIndexed) {
-            $searchIndexer->deleteOneAndReindexRelated($childModel);
-        } else {
-            $childModel->delete();
-        }
+        $searchIndexer->deleteOneAndReindexRelated($childModel);
 
         $parent->fireRevisionableEvent('deleteChild', [$childModel, $this->relationName]);
 
@@ -351,13 +335,7 @@ abstract class ChildEntityController extends AbstractRelatedEntityController
 
         $this->checkPermission(static::class.'@deleteMany', ['model' => $model, 'children' => $childModels]);
 
-        if ($this->isIndexed) {
-            $searchIndexer->deleteManyAndReindexRelated($childModels);
-        } else {
-            $childModels->each(function ($childModel) {
-                $childModel->delete();
-            });
-        }
+        $searchIndexer->deleteManyAndReindexRelated($childModels);
 
         return $this->getResponse()->noContent();
     }
