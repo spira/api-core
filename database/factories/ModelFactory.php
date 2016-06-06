@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Hash;
 use Spira\Core\Model\Test\SecondTestEntity;
 
 $factory->define(TestEntity::class, function (\Faker\Generator $faker) {
-
     return [
         'entity_id' => $faker->uuid,
         'varchar' => $faker->word,

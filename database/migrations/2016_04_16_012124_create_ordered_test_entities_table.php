@@ -25,12 +25,12 @@ class CreateOrderedTestEntitiesTable extends Migration
             return true;
         }
         Schema::create(OrderedTestEntity::getTableName(), function (Blueprint $table) {
-                $table->uuid('entity_id');
-                $table->string('varchar', 255);
-                $table->integer('integer');
+            $table->uuid('entity_id');
+            $table->string('varchar', 255);
+            $table->integer('integer');
 
-                $table->primary('entity_id');
-            }
+            $table->primary('entity_id');
+        }
         );
     }
 

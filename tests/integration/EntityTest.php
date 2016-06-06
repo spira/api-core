@@ -264,11 +264,11 @@ class EntityTest extends TestCase
             ->andReturn(10)
             ->shouldReceive('complexSearch')
             ->with(Mockery::on(function ($arr) {
-                    return is_array($arr)
+                return is_array($arr)
                         && $arr['size'] == 10
                         && $arr['from'] == 0
                         && $arr['body']['query']['match_phrase_prefix']['_all'] == 'foobar';
-                }))
+            }))
             ->andReturn($resultsMock);
 
         $this->app->instance(TestEntity::class, $mockModel);

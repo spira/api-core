@@ -80,7 +80,6 @@ class TransformerService
     protected function getTransformer($transformer = null)
     {
         return $transformer ?: function ($data) {
-
             if ($data instanceof Arrayable) {
                 return $data->toArray();
             }
