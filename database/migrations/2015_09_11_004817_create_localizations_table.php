@@ -23,7 +23,6 @@ class CreateLocalizationsTable extends Migration
     public function up()
     {
         Schema::create(static::TABLE_NAME, function (Blueprint $table) {
-
             $table->uuid('localizable_id');
             $table->string('localizable_type');
 

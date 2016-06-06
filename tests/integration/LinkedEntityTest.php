@@ -18,7 +18,6 @@ use Spira\Core\tests\Extensions\ElasticSearchIndexerTrait;
 /**
  * Class LinkedEntityTest.
  * @group integration
- * @group linked-entity
  */
 class LinkedEntityTest extends TestCase
 {
@@ -213,115 +212,5 @@ class LinkedEntityTest extends TestCase
         $first->secondTestEntities()->first()->testEntities()->sync($firstIds);
 
         return $first;
-    }
-
-    public function testAttachOneNotIndexed()
-    {
-        /** @var $entity TestEntity */
-        $entity = $this->getFactory(TestEntity::class)->create();
-        $factory = $this->getFactory(SecondTestEntity::class);
-        $second = $factory->create();
-
-        $transformed = $factory->transformed();
-        $transformed['value'] = 'ololo';
-
-        $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldNotReceive('reindexOne');
-
-        $this->putJson('test-not-indexed/many/'.$entity->entity_id.'/children/'.$second->entity_id, $transformed);
-
-        $this->assertResponseStatus(201);
-        $this->assertResponseHasNoContent();
-
-        $comparedEntity = $entity->secondTestEntities()->first();
-        $this->assertEquals($second->entity_id, $comparedEntity->entity_id);
-        $this->assertEquals('ololo', $comparedEntity->value);
-    }
-
-    public function testAttachManyNotIndexed()
-    {
-        $entity = $this->makeEntity();
-        $factory = $this->getFactory(SecondTestEntity::class);
-        $newEntities = $factory->count(3)->create();
-
-        $ids = array_merge(
-            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
-            $newEntities->pluck('entity_id')->toArray()
-        );
-
-        $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldNotReceive('reindexOne');
-        $mock->shouldNotReceive('getAllItemsFromRelations');
-        $mock->shouldNotReceive('reindexMany');
-
-        $this->postJson('test-not-indexed/many/'.$entity->entity_id.'/children', $factory->transformed());
-
-        $this->assertResponseStatus(201);
-        $this->assertArrayEquals($ids, $entity->secondTestEntities()->get()->pluck('entity_id')->toArray());
-    }
-
-    public function testSyncManyNotIndexed()
-    {
-        $entity = $this->makeEntity();
-        $factory = $this->getFactory(SecondTestEntity::class);
-        $factory->count(3)->create();
-
-        $transformed = $factory->transformed();
-        $transformed[] = $this->getFactory(SecondTestEntity::class)
-            ->setModel($entity->secondTestEntities()->first())
-            ->transformed();
-
-        $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldNotReceive('reindexOne');
-        $mock->shouldNotReceive('getAllItemsFromRelations');
-        $mock->shouldNotReceive('reindexMany');
-
-        $this->putJson('test-not-indexed/many/'.$entity->entity_id.'/children', $transformed);
-
-        $this->assertResponseStatus(201);
-
-        $this->assertCount(4, array_pluck($this->getJsonResponseAsArray(), '_self'));
-
-        $this->assertArrayEquals(
-            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray(),
-            $transformed,
-            'entityId'
-        );
-    }
-
-    public function testDetachOneNotIndexed()
-    {
-        $entity = $this->makeEntity();
-        $second = $entity->secondTestEntities()->first();
-
-        $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldNotReceive('reindexOne');
-
-        $this->deleteJson('test-not-indexed/many/'.$entity->entity_id.'/children/'.$second->entity_id);
-
-        $this->assertResponseStatus(204);
-        $this->assertResponseHasNoContent();
-
-        $this->assertNotContains(
-            $second->entity_id,
-            $entity->secondTestEntities()->get()->pluck('entity_id')->toArray()
-        );
-    }
-
-    public function testDetachAllNotIndexed()
-    {
-        $entity = $this->makeEntity();
-
-        $mock = $this->mockElasticSearchIndexer();
-        $mock->shouldNotReceive('reindexOne');
-        $mock->shouldNotReceive('getAllItemsFromRelations');
-        $mock->shouldNotReceive('reindexMany');
-
-        $this->deleteJson('test-not-indexed/many/'.$entity->entity_id.'/children');
-
-        $this->assertResponseStatus(204);
-        $this->assertResponseHasNoContent();
-
-        $this->assertTrue($entity->secondTestEntities()->get()->isEmpty());
     }
 }

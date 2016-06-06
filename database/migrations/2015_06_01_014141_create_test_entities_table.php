@@ -25,25 +25,25 @@ class CreateTestEntitiesTable extends Migration
             return true;
         }
         Schema::create(TestEntity::getTableName(), function (Blueprint $table) {
-                $table->uuid('entity_id');
-                $table->string('varchar', 255);
-                $table->char('hash', 60);
-                $table->integer('integer');
-                $table->decimal('decimal', 11, 2);
-                $table->boolean('boolean');
-                $table->boolean('nullable')->nullable();
-                $table->text('text');
-                $table->date('date');
-                $table->dateTime('time');
-                $table->boolean('multi_word_column_title');
-                $table->boolean('hidden');
-                $table->json('json');
+            $table->uuid('entity_id');
+            $table->string('varchar', 255);
+            $table->char('hash', 60);
+            $table->integer('integer');
+            $table->decimal('decimal', 11, 2);
+            $table->boolean('boolean');
+            $table->boolean('nullable')->nullable();
+            $table->text('text');
+            $table->date('date');
+            $table->dateTime('time');
+            $table->boolean('multi_word_column_title');
+            $table->boolean('hidden');
+            $table->json('json');
 
-                $table->dateTime('created_at');
-                $table->dateTime('updated_at')->nullable();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at')->nullable();
 
-                $table->primary('entity_id');
-            }
+            $table->primary('entity_id');
+        }
         );
     }
 
