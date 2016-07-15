@@ -67,9 +67,10 @@ class ApiResponse extends Response
      * Bind an item to a transformer and start building a response.
      * @param $item
      * @param int $statusCode
+     * @param bool $replaceHeaders
      * @return ApiResponse
      */
-    public function item($item, $statusCode = null)
+    public function item($item, $statusCode = null, $replaceHeaders = true)
     {
         if ($this->transformer) {
             $item = $this->transformer->transformItem($item, $this->getTransformerOptions());
@@ -84,7 +85,7 @@ class ApiResponse extends Response
         }
 
         return $this
-            ->header('Content-Type', 'application/json')
+            ->header('Content-Type', 'application/json', $replaceHeaders)
             ->setContent($this->encode($item))
             ->setStatusCode($statusCode);
     }
