@@ -592,13 +592,13 @@ abstract class EntityController extends ApiController
     public static function getBaseGuardedFunctions()
     {
         return [
-            static::class.'@getAll' => [
-                'type' => 'permission',
-                'description' => 'Get all',
-            ],
             static::class.'@getOne' => [
                 'type' => 'permission',
                 'description' => 'Get one',
+            ],
+            static::class.'@getAll' => [
+                'type' => 'permission',
+                'description' => 'Get all',
             ],
             static::class.'@postOne' => [
                 'type' => 'permission',
