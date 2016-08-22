@@ -584,4 +584,50 @@ abstract class EntityController extends ApiController
     {
         return $this->getModel()->getValidationRules($entityKey, $requestEntity);
     }
+
+    /**
+     * Default functions in the controller that check permissions.
+     * @return array
+     */
+    public static function getBaseGuardedFunctions()
+    {
+        return [
+            static::class.'@getOne' => [
+                'type' => 'permission',
+                'description' => 'Get one',
+            ],
+            static::class.'@getAll' => [
+                'type' => 'permission',
+                'description' => 'Get all',
+            ],
+            static::class.'@postOne' => [
+                'type' => 'permission',
+                'description' => 'Post one',
+            ],
+            static::class.'@putOne' => [
+                'type' => 'permission',
+                'description' => 'Put one',
+            ],
+            static::class.'@putMany' => [
+                'type' => 'permission',
+                'description' => 'Put many',
+            ],
+            static::class.'@patchOne' => [
+                'type' => 'permission',
+                'description' => 'Patch one',
+            ],
+            static::class.'@patchMany' => [
+                'type' => 'permission',
+                'description' => 'Patch many',
+            ],
+            static::class.'@deleteOne' => [
+                'type' => 'permission',
+                'description' => 'Delete one',
+            ],
+            static::class.'@deleteMany' => [
+                'type' => 'permission',
+                'description' => 'Delete many',
+            ],
+        ];
+    }
 }
