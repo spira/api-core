@@ -586,7 +586,7 @@ abstract class EntityController extends ApiController
     }
 
     /**
-     * Default functions in the controller that check permissions
+     * Default functions in the controller that check permissions.
      * @return array
      */
     public static function getBaseGuardedFunctions()
