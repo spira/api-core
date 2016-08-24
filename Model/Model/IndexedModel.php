@@ -125,7 +125,7 @@ abstract class IndexedModel extends BaseModel
                 /** @var IndexedModel|IndexedCollection $results */
                 $results = $this->$nestedModelName()->getResults();
 
-                $nestedModelMappingProperties = $this->mappingProperties['_'.$nestedModelName]['properties'];
+                $nestedModelMappingProperties = $this->getMappingProperties()['_'.$nestedModelName]['properties'];
 
                 if (is_null($results)) {
                     // Move to next relation
