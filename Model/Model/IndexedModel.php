@@ -196,7 +196,7 @@ abstract class IndexedModel extends BaseModel
 
         static::updated(
             function (IndexedModel $model) {
-                $model->updateIndex();
+                $model->addToIndex();
 
                 return true;
             }, PHP_INT_MAX

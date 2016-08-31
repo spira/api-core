@@ -26,7 +26,7 @@ class ElasticSearchIndexer
             $this->reindexMany($this->getRelationItems($model, $relation), []);
         }
 
-        return $model->updateIndex();
+        return $model->addToIndex();
     }
 
     /**
