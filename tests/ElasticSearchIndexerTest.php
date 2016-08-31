@@ -33,7 +33,7 @@ class ElasticSearchIndexerTest extends TestCase
 
         /** @var IndexedModel $related */
         $related = \Mockery::mock(IndexedModel::class)->makePartial();
-        $related->shouldReceive('updateIndex')->twice();
+        $related->shouldReceive('addToIndex')->twice();
 
         $relation = \Mockery::mock(Relation::class)->makePartial();
         $relation->shouldReceive('getResults')->once()->andReturn([$related]); // Relation returns collection
@@ -41,11 +41,11 @@ class ElasticSearchIndexerTest extends TestCase
 
         $entity = $this->makeEntityMock();
 
-        $entity->shouldReceive('updateIndex')->once()->andReturn([]);
+        $entity->shouldReceive('addToIndex')->once()->andReturn([]);
         $entity->shouldReceive('secondTestEntities')->once()->andReturn($relation);
         $entity->shouldReceive('testMany')->once()->andReturn($relation);
 
-        $this->assertIsArray($esi->reindexOne($entity)); // Assert method returns result of $entity->updateIndex()
+        $this->assertIsArray($esi->reindexOne($entity)); // Assert method returns result of $entity->addToIndex()
     }
 
     public function testReindexOneWithSpecifiedRelations()
@@ -56,7 +56,7 @@ class ElasticSearchIndexerTest extends TestCase
         $relation = \Mockery::mock(Relation::class)->makePartial();
         $relation->shouldReceive('getResults')->once()->andReturn([]);
 
-        $entity->shouldReceive('updateIndex')->once();
+        $entity->shouldReceive('addToIndex')->once();
         $entity->shouldReceive('secondTestEntities')->once()->andReturn($relation);
 
         $esi->reindexOne($entity, ['secondTestEntities', 'nonexistantRelation']);
@@ -67,7 +67,7 @@ class ElasticSearchIndexerTest extends TestCase
         $esi = $this->makeIndexer();
 
         $entity = $this->makeEntityMock();
-        $entity->shouldReceive('updateIndex')->once();
+        $entity->shouldReceive('addToIndex')->once();
 
         $esi->reindexOne($entity, []);
     }
@@ -84,7 +84,7 @@ class ElasticSearchIndexerTest extends TestCase
         $esi = new ElasticSearchIndexer([]);
 
         $entity = $this->makeEntityMock();
-        $entity->shouldReceive('updateIndex')->once();
+        $entity->shouldReceive('addToIndex')->once();
 
         $esi->reindexOne($entity);
     }
@@ -116,7 +116,7 @@ class ElasticSearchIndexerTest extends TestCase
         $esi = $this->makeIndexer();
 
         $related = $this->makeEntityMock();
-        $related->shouldReceive('updateIndex')->once();
+        $related->shouldReceive('addToIndex')->once();
 
         $relation = \Mockery::mock(Relation::class);
         $relation->shouldReceive('getResults')->once()->andReturn([$related]);
