@@ -453,7 +453,7 @@ abstract class EntityController extends ApiController
                 $params = array_merge($params, ['from' => $offset]);
             }
 
-            // Simple query
+        // Simple query
         } else {
             $params = $model->getBasicEsParams(true, true, true, $limit, $offset);
             $params['body']['query'] = [
