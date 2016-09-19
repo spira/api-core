@@ -437,7 +437,6 @@ abstract class EntityController extends ApiController
     {
         /* @var ElasticquentTrait $model */
         $model = $this->getModel();
-
         // Complex query
         if (is_array($query)) {
             $params = [
@@ -445,6 +444,14 @@ abstract class EntityController extends ApiController
                 'type' => $model->getTypeName(),
                 'body' => $this->translateQuery($query),
             ];
+
+            if (is_numeric($limit)) {
+                $params = array_merge($params, ['size' => $limit]);
+            }
+
+            if (is_numeric($offset)) {
+                $params = array_merge($params, ['from' => $offset]);
+            }
 
         // Simple query
         } else {

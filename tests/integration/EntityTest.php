@@ -303,6 +303,8 @@ class EntityTest extends TestCase
                 'index' => 'defaultIndex',
                 'type' => 'someTypeName',
                 'body' => ['query' => ['bool' => ['must' => [['match_phrase_prefix' => ['_all' => 'search term']], ['match_phrase_prefix' => ['author_id' => 'some UUID']], ['nested' => ['path' => '_tags', 'query' => ['bool' => ['must' => ['match_phrase_prefix' => ['_tags.tag_id' => 'tag ID 1']]]]]], ['nested' => ['path' => '_tags', 'query' => ['bool' => ['must' => ['match_phrase_prefix' => ['_tags.tag_id' => 'tag ID 2']]]]]]]]]],
+                'size' => 10,
+                'from' => 0,
             ])
             ->andReturn($resultsMock);
 
@@ -352,6 +354,8 @@ class EntityTest extends TestCase
                 'index' => 'defaultIndex',
                 'type' => 'someTypeName',
                 'body' => ['query' => ['match_all' => []]],
+                'size' => 10,
+                'from' => 0,
             ])
             ->andReturn($resultsMock);
 
