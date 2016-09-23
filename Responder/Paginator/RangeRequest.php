@@ -124,6 +124,9 @@ class RangeRequest implements PaginatedRequestDecoratorInterface
     {
         if ($this->getRequest()->headers) {
             $range = $this->getRequest()->headers->get('Range');
+            if(!$range) {
+                $range = $this->getRequest()->headers->get('Range-Requested');
+            }
 
             if (strpos($range, $this->rangeKey.'=') !== 0) {
                 throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid Range header, Expected format example - `Range: '.$this->rangeKey.'=0-100`');
